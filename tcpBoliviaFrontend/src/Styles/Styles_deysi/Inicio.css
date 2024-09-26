@@ -1,0 +1,66 @@
+.fondo_Dinamica {
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.letra {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.contenedor-principal {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+
+
+.contenedor-dinamico-cuadro {
+  margin-top: 20px;
+}
+
+.contenedor-dinamico {
+  display: flex;
+  justify-content: space-between;
+}
+
+.columna {
+  flex: 1;
+  margin: 10px;
+}
+
+/**/
+.contenedor-opciones {
+  display: flex;
+  justify-content: space-between; /* Alinea los botones a los extremos */
+  align-items: center; /* Alinea verticalmente los botones */
+  margin-bottom: 3px; /* Espaciado entre el título y los botones */
+  padding: 10px; /* Añade un poco de padding alrededor */
+  background-color: #D9D9D9; /* Opcional: fondo claro para hacer destacar los botones */
+  border-radius: 8px; /* Bordes redondeados */
+  border: 1px solid #A3A3A3;
+  margin-top: 0px;
+}
+
+.btn-explorar, .btn-retroceder {
+  background-color: transparent; /* Fondo transparente */
+  border: 1px solid #A3A3A3; /* Borde negro */
+  color: #000; /* Color de texto negro */
+  font-size: 16px; /* Tamaño de la fuente */
+  padding: 5px ; /* Espaciado interno del botón */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Icono de cursor de mano */
+  transition: background-color 0.3s ease; /* Efecto de transición en hover */
+}
+
+.btn-explorar:hover, .btn-retroceder:hover {
+  background-color: #e0e0e0; /* Fondo gris claro al hacer hover */
+}
+
+.icono-filtro, .icono-retroceder {
+  margin-right: 8px; /* Espaciado entre el icono y el texto */
+}
+

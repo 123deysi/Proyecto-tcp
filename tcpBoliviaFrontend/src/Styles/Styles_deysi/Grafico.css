@@ -1,0 +1,50 @@
+/* Estilos para el contenedor del gráfico */
+.container-grafico {
+  padding: 20px;
+  background-color: #ffffff; 
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+  height: 500px;
+  
+}
+
+/* Ajusta la altura del gráfico para que se ajuste a la visualización */
+.container-grafico canvas {
+  width: 100% !important; 
+  height: auto !important; 
+  margin-right: 0px;
+}
+
+.map-description {
+  margin-top: 20px; /* Espacio entre el mapa y la descripción */
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+}
+
+.contenedor-grafico-mapa {
+  display: flex;
+  flex-wrap: wrap; /* Permite que los elementos se ajusten en pantallas pequeñas */
+  justify-content: space-between; /* Espacia los elementos */
+  align-items: flex-start; /* Alinea los elementos verticalmente al inicio */
+  gap: 20px; /* Espaciado entre el gráfico y el mapa */
+}
+
+.contenedor-grafico-mapa > div {
+  flex: 1; /* Ambos elementos ocuparán el mismo espacio */
+  min-width: 45%; /* Asegura que no sean más pequeños de un 45% en pantallas pequeñas */
+  max-width: 48%; /* Asegura que no ocupen más del 48% en pantallas grandes */
+}
+
+@media (max-width: 768px) {
+  .contenedor-grafico-mapa > div {
+    flex: 1 1 100%; /* En pantallas pequeñas, ambos elementos ocupan el 100% */
+    max-width: 100%; /* Asegura que ocupen todo el ancho */
+  }
+}
+

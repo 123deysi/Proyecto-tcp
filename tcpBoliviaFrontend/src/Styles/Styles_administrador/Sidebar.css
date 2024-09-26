@@ -1,0 +1,45 @@
+.MuiDrawer-paper {
+  background-color: #561427;
+  color: #ffffff;
+  border-right: 1px solid #6c1b30;
+}
+
+.sidebar-toolbar {
+  background-color: #722f46;
+  padding: 16px;  
+}
+
+.sidebar-title {
+
+    color: #ffffff;
+    background-color: transparent;
+}
+
+.sidebar-list-item {
+  padding: 12px 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar-list-item:hover {
+  background-color: #8a3d5e;
+}
+
+.sidebar-list-item-text {
+  color: #080808 !important; /* Más claro para mejorar la legibilidad */
+}
+
+.sidebar-icon {
+  color: #6c1b30; /* Combina con el texto para uniformidad */
+}
+
+/* Ítem activo */
+.sidebar-list-item.active {
+  background-color: #f3eff0;
+}
+
+.sidebar-list-item-text.active {
+  font-weight: bold;
+  color: #ffffff; /* Asegura que el texto activo sea muy visible */
+}
+
+

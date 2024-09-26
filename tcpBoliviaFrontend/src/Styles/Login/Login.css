@@ -1,0 +1,82 @@
+/* Global styles */
+
+  /* Login container */
+  
+  
+  /* Card styles */
+  .w-full {
+    max-width: 400px;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .w-full:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Title styling */
+  .text-2xl {
+    font-size: 24px;
+    text-align: center;
+    color: #333;
+    margin-bottom: 24px;
+  }
+  
+  /* Error message */
+  .text-red-500 {
+    color: #e3342f;
+    margin-bottom: 16px;
+  }
+  
+  /* Input styles */
+  input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+  
+  input[type="email"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: #2575fc;
+    box-shadow: 0 0 8px rgba(37, 117, 252, 0.4);
+  }
+  
+  /* Button styles */
+  button[type="submit"] {
+    width: 100%;
+    background-color: #2575fc;
+    color: white;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #1b5db0;
+    transform: translateY(-3px);
+  }
+  
+  button[type="submit"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.4);
+  }
+  
+  /* Media query for mobile responsiveness */
+  @media (max-width: 768px) {
+    .w-full {
+      padding: 20px;
+      width: 90%;
+    }
+  }
+  

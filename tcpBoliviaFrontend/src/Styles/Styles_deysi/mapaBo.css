@@ -1,0 +1,77 @@
+/* Contenedor del mapa */
+.mapa-container {
+  width: 100%;
+  height: 500px; /* Ajusta el tamaño según sea necesario */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color:#F4F4F4;/* Fondo gris claro para resaltar el mapa */
+  border-radius: 8px; /* Bordes redondeados para un look más moderno */
+  margin-top: 10px;
+  overflow: hidden; /* Asegura que el contenido no sobresalga del contenedor */
+}
+
+/* Estilo del SVG */
+#svg_bolivia {
+  width: 100%;
+  height: 100%;
+  display: block; /* Elimina el espacio en blanco alrededor del SVG */
+  padding-top: 15;
+  padding-left: 100px;
+  padding-right: 0px
+}
+
+/* Estilo para las rutas dentro del SVG */
+#features path {
+  fill: #d0d0d0; /* Color base más claro */
+  stroke: #ffffff; /* Borde blanco para un mejor contraste */
+  stroke-width: 1; /* Grosor del borde */
+  transition: fill 0.3s ease; /* Transición suave al pasar el ratón */
+}
+
+#features path:not(.activo):hover {
+  fill: #4CAF50; /* Color verde más oscuro al pasar el ratón */
+}
+
+#features path.activo {
+  fill: #81C784; /* Color verde claro para áreas activas */
+}
+
+/* Escala general para el contenido del mapa */
+g#features {
+  transform: scale(1); /* Ajusta la escala si es necesario */
+}
+
+/* Estilo para las estadísticas */
+.stat-label {
+  font-size: 45px; /* Ajusta el tamaño del texto según sea necesario */
+  fill: #fcf9f9; /* Color del texto, más oscuro para mejor contraste */
+  /*font-weight: bold; /* Peso de la fuente para destacar */
+  text-anchor: middle; /* Alineación horizontal del texto */
+}
+
+/* Estilo para el tooltip */
+.tooltip {
+  position: absolute;
+  background-color: #ffffff; /* Fondo blanco para el tooltip */
+  border: 1px solid #ddd; /* Borde gris claro */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 15px; /* Espaciado interno */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Sombra sutil para profundidad */
+  z-index: 10;
+  max-width: 300px; /* Ancho máximo del tooltip */
+  font-size: 14px; /* Tamaño de fuente más pequeño */
+}
+
+.tooltip h3 {
+  margin: 0;
+  font-size: 16px; /* Tamaño de fuente para el título */
+  color: #333; /* Color oscuro para el título */
+  font-weight: bold;
+}
+
+.tooltip p {
+  margin: 5px 0 0;
+  color: #666; /* Color gris para el contenido */
+}
