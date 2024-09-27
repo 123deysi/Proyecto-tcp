@@ -93,24 +93,69 @@ public function obtenerAniosUnicos()
     return response()->json($aniosUnicos);
 }
 
-    public function casosPorDepartamento()
+public function casosPorDepartamento(Request $request)
 {
-    // Obtener el total de casos
-    $totalCasos = DB::table('casos')->count();
+    $departamento_id = $request->query('departamento_id');
 
-    // Obtener casos por departamento y calcular el porcentaje
-    $casosPorDepartamento = DB::table('departamentos')
+    $query = DB::table('departamentos')
         ->leftJoin('casos', 'departamentos.id', '=', 'casos.departamento_id')
         ->select('departamentos.nombre AS departamento', DB::raw('COUNT(casos.id) AS cantidad_casos'))
-        ->groupBy('departamentos.nombre')
-        ->get()
-        ->map(function ($item) use ($totalCasos) {
-            $item->porcentaje = $totalCasos > 0 ? ($item->cantidad_casos / $totalCasos) * 100 : 0;
-            return $item;
-        });
+        ->groupBy('departamentos.nombre');
+
+    if ($departamento_id) {
+        $query->where('departamentos.id', $departamento_id);
+    }
+
+    $casosPorDepartamento = $query->get();
 
     return response()->json($casosPorDepartamento);
 }
+
+
+public function casosPorMunicipio(Request $request)
+{
+    // Aquí deberías definir tu lógica para obtener los casos por municipio.
+    // Por ejemplo, utilizando un modelo que se relacione con municipios y casos.
+    
+    $municipios = DB::table('municipios')
+        ->join('casos', 'municipios.id', '=', 'casos.municipio_id')
+        ->select('municipios.nombre as municipio', DB::raw('COUNT(casos.id) as cantidad_de_casos'))
+        ->groupBy('municipios.nombre')
+        ->get();
+
+    return response()->json($municipios);
+}
+
+public function casosPorDepartamentoYMunicipio(Request $request)
+{
+    $orderDirection = $request->input('order', 'asc');
+
+    // Ensure the direction is valid
+    if (!in_array($orderDirection, ['asc', 'desc'])) {
+        return response()->json(['error' => 'Invalid order direction'], 400);
+    }
+
+    $departmentId = $request->input('departamento_id');
+
+    $query = DB::table('casos as c')
+        ->select('d.nombre as departamento', 'm.nombre as municipio', DB::raw('COUNT(c.id) as cantidad_de_casos'))
+        ->leftJoin('departamentos as d', 'c.departamento_id', '=', 'd.id')
+        ->leftJoin('municipios as m', 'c.municipio_id', '=', 'm.id')
+        ->groupBy('d.nombre', 'm.nombre')
+        ->orderBy('d.nombre', $orderDirection)
+        ->orderBy('m.nombre', $orderDirection);
+
+    if ($departmentId) {
+        $query->where('c.departamento_id', $departmentId);
+    }
+
+    $results = $query->get();
+
+    return response()->json($results);
+}
+
+
+
 
 
     /**

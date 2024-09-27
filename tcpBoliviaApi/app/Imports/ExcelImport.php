@@ -138,91 +138,78 @@ class ExcelImport implements ToCollection, WithHeadingRow
                     }
                     $idTipoResolucion = $tipoResolucion->id;
                 }
-         // Crear o actualizar el registro en Casos
-$idCaso = null;
-$id2 = trim($row['id2'] ?? ''); // Asumiendo que 'id2' es el identificador único
+              // Crear o actualizar el registro en Casos
+                $idCaso = null;
+                $id2 = trim($row['id2'] ?? '');
 
-if ($id2 !== '' && $id2 !== 'NULL') {
-    // Buscar el caso por 'id2' en lugar de 'exp'
-    $caso = Caso::where('id2', $id2)->first();
-    
-    if (!$caso) {
-        // Si no existe, creamos uno nuevo
-        $caso = new Caso();
-        $caso->id2 = $id2; // Asignamos 'id2' como el identificador único
-        $caso->exp = $row['exp'] ?? null; // Si 'exp' es opcional, se mantiene
-        $caso->sala = $row['sala'] ?? null;
-        $caso->accion_const_id = $idSubtipoAccion;
-        $caso->accion_const2_id = $idAccionConstitucional;
-        $caso->res_emisor_id = $idResEmisor;
-        $caso->departamento_id = $idDepartamento;
-        $caso->municipio_id = $idMunicipio;
-        $caso->fecha_ingreso = isset($row['fecha_ingreso']) && !empty($row['fecha_ingreso']) 
-            ? Carbon::parse($row['fecha_ingreso'])->format('Y-m-d') 
-            : null;
-        $caso->created_at = now();
-        $caso->updated_at = now();
-        $caso->save();
-    }
-    $idCaso = $caso->id; // Guardamos el ID del caso
-}
+                if ($id2 !== '' && $id2 !== 'NULL') {
+                    $caso = Caso::firstOrNew(['id2' => $id2]);
+                    $caso->exp = $row['exp'] ?? null;
+                    $caso->sala = $row['sala'] ?? null;
+                    $caso->accion_const_id = $idSubtipoAccion;
+                    $caso->accion_const2_id = $idAccionConstitucional;
+                    $caso->res_emisor_id = $idResEmisor;
+                    $caso->departamento_id = $idDepartamento;
+                    $caso->municipio_id = $idMunicipio;
 
+                    // Aquí se agrega el registro en log para ver el valor de fecha_ingreso
+                    if (isset($row['fecha_ingreso']) && !empty($row['fecha_ingreso'])) {
+                        Log::info('Fecha de ingreso recibida: ' . $row['fecha_ingreso']);
+                        
+                        try {
+                            // Intentar convertir y formatear la fecha
+                            $fechaIngreso = Carbon::createFromFormat('d/m/Y', $row['fecha_ingreso']);
+                            $caso->fecha_ingreso = $fechaIngreso ? $fechaIngreso->format('Y-m-d') : null;
+                            Log::info('Fecha de ingreso convertida: ' . $caso->fecha_ingreso);
+                        } catch (\Exception $e) {
+                            Log::error('Error en la conversión de fecha_ingreso: ' . $e->getMessage());
+                            $caso->fecha_ingreso = null; // Asignar null en caso de error
+                        }
+                    } else {
+                        Log::info('No se proporcionó fecha de ingreso. Asignando null.');
+                        $caso->fecha_ingreso = null; // Asignar null si no hay fecha
+                    }
 
-     // Crear o actualizar el registro en Resolucion
+                    // Guardar el caso
+                    if (!$caso->save()) {
+                        Log::error('Error al guardar el caso: ' . json_encode($caso->getErrors()));
+                    } else {
+                        Log::info('Caso guardado con éxito: ' . json_encode($caso));
+                    }
+                }
 
-     $idResolucion = null;
-$id2 = trim($row['id2'] ?? ''); // Tomar el 'id2' desde el archivo importado
-if ($id2 !== '' && $id2 !== 'NULL') {
-    // Buscar el caso por el campo 'id2' en lugar de 'exp'
-    $caso = Caso::where('id2', $id2)->first();
+                // Crear o actualizar el registro en Resolucion
 
-    if ($caso) {
-        // Buscar o crear la resolución basada en 'numres2'
-        $resolucion = Resolucion::firstOrNew(['numres2' => $row['numres2']]);
+                $idResolucion = null;
+                $id2 = trim($row['id2'] ?? ''); // Tomar el 'id2' desde el archivo importado
+                if ($id2 !== '' && $id2 !== 'NULL') {
+                    // Buscar el caso por el campo 'id2' en lugar de 'exp'
+                    $caso = Caso::where('id2', $id2)->first();
 
-        // Asignar los valores al objeto Resolución
-        $resolucion->res_fecha = !empty($row['res_fecha']) ? Carbon::parse($row['res_fecha'])->format('Y-m-d') : null;
-        $resolucion->res_tipo_id = $idTipoResolucion ?? null;
-        $resolucion->res_tipo2_id = $idTipoResolucion2 ?? null;
-        $resolucion->res_fondo_voto = is_numeric($row['res_fondo_voto']) ? (int)$row['res_fondo_voto'] : null;
-        $resolucion->resresul = $row['resresul'] ?? null;
-        $resolucion->revresul = $row['revresul'] ?? null;
-        $resolucion->resfinal = $row['resfinal'] ?? null;
-        $resolucion->relator = $row['relator'] ?? null;
-        //$resolucion->restiempo = is_numeric($row['restiempo']) ? (float)$row['restiempo'] : null;
-        $resolucion->restiempo = is_numeric(str_replace(',', '.', $row['restiempo'])) ? (float)str_replace(',', '.', $row['restiempo']) : null;
-        $resolucion->caso_id = $caso->id; // Asignar la relación con el caso
-        
-        // Guardar la resolución
-        $resolucion->save();
-        
-        // Obtener el ID de la resolución
-        $idResolucion = $resolucion->id;
-    }
-}
+                    if ($caso) {
+                        // Buscar o crear la resolución basada en 'numres2'
+                        $resolucion = Resolucion::firstOrNew(['numres2' => $row['numres2']]);
 
-
-     // Crear o actualizar el registro en ExcelDBRegistro
-              /*  ExcelDBRegistro::create([
-                    'numres2'         => $row[0] ?? null,
-                    'res_fecha'       => isset($row[1]) && !empty($row[1]) ? Carbon::parse($row[1])->format('Y-m-d') : null,
-                    'res_tipo'        => $row[2] ?? null,
-                    'res_tipo2'       => $row[3] ?? null,
-                    'res_fondo_voto' => isset($row[4]) && is_numeric($row[4]) ? (int)$row[4] : null,
-                    'resresul'        => $row[5] ?? null,
-                    'revresul'        => $row[6] ?? null,
-                    'resfinal'        => $row[7] ?? null,
-                    'relator'         => $row[8] ?? null,
-                    'restiempo'       => isset($row[9]) && is_numeric($row[9]) ? (float)$row[9] : null,
-                    'caso_id'         => $row[10] ?? null,
-                    'sala'            => $row[11] ?? null,
-                    'accion_const'    => $row[12] ?? null,
-                    'accion_const2'   => $row[13] ?? null,
-                    'res_emisor'      => $idResEmisor,
-                    'departamento_id' => $idDepartamento,
-                    'municipio_id'    => $row[16] ?? null,
-                    'fecha_ingreso'   => isset($row[17]) && !empty($row[17]) ? Carbon::parse($row[17])->format('Y-m-d') : null,
-                ]);  */
+                        // Asignar los valores al objeto Resolución
+                        $resolucion->res_fecha = !empty($row['res_fecha']) ? Carbon::parse($row['res_fecha'])->format('Y-m-d') : null;
+                        $resolucion->res_tipo_id = $idTipoResolucion ?? null;
+                        $resolucion->res_tipo2_id = $idTipoResolucion2 ?? null;
+                        $resolucion->res_fondo_voto = is_numeric($row['res_fondo_voto']) ? (int)$row['res_fondo_voto'] : null;
+                        $resolucion->resresul = $row['resresul'] ?? null;
+                        $resolucion->revresul = $row['revresul'] ?? null;
+                        $resolucion->resfinal = $row['resfinal'] ?? null;
+                        $resolucion->relator = $row['relator'] ?? null;
+                        //$resolucion->restiempo = is_numeric($row['restiempo']) ? (float)$row['restiempo'] : null;
+                        $resolucion->restiempo = is_numeric(str_replace(',', '.', $row['restiempo'])) ? (float)str_replace(',', '.', $row['restiempo']) : null;
+                        $resolucion->caso_id = $caso->id; // Asignar la relación con el caso
+                        
+                        // Guardar la resolución
+                        $resolucion->save();
+                        
+                        // Obtener el ID de la resolución
+                        $idResolucion = $resolucion->id;
+                    }
+            }
             } catch (\Exception $e) {
                 Log::error('Error al guardar la fila: ' . json_encode($row) . ' - Error: ' . $e->getMessage());
             }
