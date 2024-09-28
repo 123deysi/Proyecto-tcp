@@ -28,6 +28,10 @@ const PaginaFiltro = () => {
         const casesResponse = await axios.get('http://localhost:8000/api/casos', { params: { order: 'asc' } });
         formatChartData1(casesResponse.data);
 
+        const municipioResponse = await axios.get('http://localhost:8000/api/casos/municipios', {
+          params: { order: 'asc' }
+        });
+        formatChartData2(municipioResponse.data);
       } catch (error) {
         console.error('Error fetching data', error);
         setError('Error fetching data');
@@ -50,7 +54,6 @@ const PaginaFiltro = () => {
         params: { departamento_id: departmentId }
       });
       formatChartData2(municipioResponse.data);
-
     } catch (error) {
       console.error('Error fetching data', error);
       setError('Error fetching data');
@@ -117,7 +120,7 @@ const PaginaFiltro = () => {
             {chartData1.labels.map((label, index) => (
               <tr key={index}>
                 <td>{label}</td>
-                <td>{chartData1.datasets[0]?.data[index] ?? 0}</td> {/* Usando el operador de encadenamiento opcional */}
+                <td>{chartData1.datasets[0]?.data[index] ?? 0}</td>
               </tr>
             ))}
             <tr>
@@ -140,7 +143,7 @@ const PaginaFiltro = () => {
             {chartData2.labels.map((label, index) => (
               <tr key={index}>
                 <td>{label}</td>
-                <td>{chartData2.datasets[0]?.data[index] ?? 0}</td> {/* Usando el operador de encadenamiento opcional */}
+                <td>{chartData2.datasets[0]?.data[index] ?? 0}</td>
               </tr>
             ))}
             <tr>
