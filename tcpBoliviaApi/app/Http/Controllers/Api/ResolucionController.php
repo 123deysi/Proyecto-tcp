@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Resolucion;
 use Illuminate\Http\Request;
@@ -98,4 +99,18 @@ class ResolucionController extends Controller
 
         return response()->json(null, 204);
     }
+
+
+    public function resolucionesPorFecha()
+{
+    $resolucionesPorFecha = DB::table('resoluciones')
+        ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('MONTH(res_fecha) AS mes'), DB::raw('COUNT(numres2) AS cantidad_resoluciones'))
+        ->whereNotNull('res_fecha')
+        ->groupBy(DB::raw('YEAR(res_fecha), MONTH(res_fecha)'))
+        ->orderBy('anio')
+        ->orderBy('mes')
+        ->get();
+
+    return response()->json($resolucionesPorFecha);
+}
 }

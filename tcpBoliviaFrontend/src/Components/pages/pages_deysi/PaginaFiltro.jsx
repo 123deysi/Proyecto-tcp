@@ -11,6 +11,9 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale);
 const PaginaFiltro = () => {
   const [chartData1, setChartData1] = useState({ labels: [], datasets: [] });
   const [chartData2, setChartData2] = useState({ labels: [], datasets: [] });
+  const [chartData3, setChartData3] = useState({ labels: [], datasets: [] });
+  const [chartData4, setChartData4] = useState({ labels: [], datasets: [] });
+
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [totalCases, setTotalCases] = useState(0);
@@ -22,51 +25,70 @@ const PaginaFiltro = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Obtener departamentos y casos
         const departmentsResponse = await axios.get('http://localhost:8000/api/departamentos');
         setDepartments(departmentsResponse.data);
-
+  
         const casesResponse = await axios.get('http://localhost:8000/api/casos', { params: { order: 'asc' } });
         formatChartData1(casesResponse.data);
-
-        const municipioResponse = await axios.get('http://localhost:8000/api/casos/municipios', {
-          params: { order: 'asc' }
-        });
+  
+        const municipioResponse = await axios.get('http://localhost:8000/api/casos/municipios', { params: { order: 'asc' } });
         formatChartData2(municipioResponse.data);
+  
+        // Obtener resoluciones por departamento y tipo
+        const resolucionesResponse = await axios.get('http://localhost:8000/api/resoluciones/departamento-tipo');
+        formatChartData3(resolucionesResponse.data);
+        
+        // Obtener cantidad de resoluciones por año y mes
+        const resolucionesPorFechaResponse = await axios.get('http://localhost:8000/api/resoluciones/por-fecha'); // Cambia la URL según sea necesario
+        formatChartData4(resolucionesPorFechaResponse.data);
+
       } catch (error) {
         console.error('Error fetching data', error);
         setError('Error fetching data');
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const handleDepartmentChange = async (e) => {
     const departmentId = e.target.value;
+    console.log('Selected Department:', departmentId);  // Verifica que el departamento seleccionado sea correcto
     setSelectedDepartment(departmentId);
+  
     try {
-      const response = await axios.get('http://localhost:8000/api/casos', {
+      // Filtrar casos por departamento
+      const casesResponse = await axios.get('http://localhost:8000/api/casos', {
         params: { departamento_id: departmentId, order: 'asc' }
       });
-      formatChartData1(response.data);
-
+      formatChartData1(casesResponse.data);
+  
+      // Filtrar municipios por departamento
       const municipioResponse = await axios.get('http://localhost:8000/api/casos/municipios', {
         params: { departamento_id: departmentId }
       });
       formatChartData2(municipioResponse.data);
+  
+      // Filtrar resoluciones por departamento para el gráfico 3
+      const resolucionesResponse = await axios.get('http://localhost:8000/api/resoluciones/departamento-tipo', {
+        params: { departamento_id: departmentId }
+      });
+      formatChartData3(resolucionesResponse.data);
+      console.log('Resoluciones Response Data:', resolucionesResponse.data);
     } catch (error) {
       console.error('Error fetching data', error);
       setError('Error fetching data');
     }
   };
+  
 
   const formatChartData1 = (data) => {
     if (!data || !Array.isArray(data)) {
-      console.error('Invalid data format');
       setError('Invalid data format');
       return;
     }
-
     const labels = data.map(item => item.departamento);
     const counts = data.map(item => item.cantidad_casos);
     const total = counts.reduce((acc, curr) => acc + curr, 0);
@@ -86,7 +108,6 @@ const PaginaFiltro = () => {
 
   const formatChartData2 = (data) => {
     if (!data || !Array.isArray(data)) {
-      console.error('Invalid data format');
       setError('Invalid data format');
       return;
     }
@@ -106,7 +127,75 @@ const PaginaFiltro = () => {
     });
   };
 
-  const renderTable = () => {
+  const formatChartData3 = (data) => {
+    if (!data || !Array.isArray(data)) {
+      console.error('Invalid data format');
+      setError('Invalid data format');
+      return;
+    }
+  
+    console.log('Data for Resoluciones:', data); // Log para depuración
+    
+    // Filtrar los elementos que tienen valores nulos o vacíos
+    const filteredData = data.filter(item => 
+      item.departamento && item.tipo_resolucion2 && item.sub_tipo_resolucion && item.cantidad_resoluciones
+    );
+    
+    // Verificar si hay datos filtrados
+    if (filteredData.length === 0) {
+      console.error('No valid data for chart 3');
+      setError('No valid data for chart 3');
+      return;
+    }
+  
+    // Mapeo de las etiquetas y valores filtrados
+    const labels = filteredData.map(item => `${item.departamento} - ${item.tipo_resolucion2} - ${item.sub_tipo_resolucion}`);
+    const counts = filteredData.map(item => item.cantidad_resoluciones);
+  
+    console.log('Filtered Data for Resoluciones:', filteredData);
+    console.log('Formatted Labels:', labels);
+    console.log('Formatted Counts:', counts);
+  
+    setChartData3({
+      labels,
+      datasets: [
+        {
+          label: 'Cantidad de Resoluciones',
+          data: counts,
+          backgroundColor: 'rgba(153, 102, 255, 0.6)', // Color personalizable
+        },
+      ],
+    });
+  };
+    const formatChartData4 = (data) => {
+      if (!data || !Array.isArray(data)) {
+        console.error('Invalid data format');
+        setError('Invalid data format');
+        return;
+      }
+    
+      // Array con los nombres de los meses en español
+      const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+    
+      const labels = data.map(item => `${item.anio} - ${monthNames[item.mes - 1]}`); // Ajustamos aquí
+      const counts = data.map(item => item.cantidad_resoluciones);
+    
+      setChartData4({
+        labels,
+        datasets: [
+          {
+            label: 'Cantidad de Resoluciones por Fecha',
+            data: counts,
+            backgroundColor: 'rgba(255, 206, 86, 0.6)', // Color personalizable
+          },
+        ],
+      });
+    };
+  
+    const renderTable = () => {
     if (currentChart === 'chart1') {
       return (
         <table className="data-table">
@@ -130,7 +219,7 @@ const PaginaFiltro = () => {
           </tbody>
         </table>
       );
-    } else {
+    } else if (currentChart === 'chart2') {
       return (
         <table className="data-table">
           <thead>
@@ -153,7 +242,54 @@ const PaginaFiltro = () => {
           </tbody>
         </table>
       );
+    } else if (currentChart === 'chart3') {
+      return (
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Departamento - Tipo Resolución - Subtipo Resolución</th>
+              <th>Cantidad de Resoluciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chartData3.labels.map((label, index) => (
+              <tr key={index}>
+                <td>{label}</td>
+                <td>{chartData3.datasets[0]?.data[index] ?? 0}</td>
+              </tr>
+            ))}
+            <tr>
+              <td><strong>Total</strong></td>
+              <td><strong>{chartData3.datasets[0]?.data.reduce((acc, curr) => acc + curr, 0) ?? 0}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    } else if (currentChart === 'chart4') {
+      return (
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Mes</th> {/* Cambiado aquí */}
+              <th>Cantidad de Resoluciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chartData4.labels.map((label, index) => (
+              <tr key={index}>
+                <td>{label}</td>
+                <td>{chartData4.datasets[0]?.data[index] ?? 0}</td>
+              </tr>
+            ))}
+            <tr>
+              <td><strong>Total</strong></td>
+              <td><strong>{chartData4.datasets[0]?.data.reduce((acc, curr) => acc + curr, 0) ?? 0}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      );
     }
+    
   };
 
   if (error) {
@@ -192,10 +328,13 @@ const PaginaFiltro = () => {
         <select onChange={(e) => setCurrentChart(e.target.value)} value={currentChart} className="select-grafico">
           <option value='chart1'>Gráfico por Departamento</option>
           <option value='chart2'>Gráfico por Municipio</option>
+          <option value='chart3'>Gráfico por Resoluciones</option>
+          <option value='chart4'>Gráfico por Fecha (Año-Mes)</option> 
         </select>
 
+
         <div className="contenedor-dinamico-cuadro">
-          {viewType === 'chart' ? (
+        {viewType === 'chart' ? (
             <div>
               <div className="chart-container">
                 {currentChart === 'chart1' && (
@@ -203,9 +342,7 @@ const PaginaFiltro = () => {
                     {chartType === 'bar' && <Bar data={chartData1} />}
                     {chartType === 'line' && <Line data={chartData1} />}
                     {chartType === 'pie' && <Pie data={chartData1} />}
-                    <p className="chart-description">
-                      "Este gráfico presenta la cantidad total de casos reportados por departamento..."
-                    </p>
+                    <p className="chart-description">"Este gráfico presenta la cantidad total de casos reportados por departamento..."</p>
                   </>
                 )}
                 {currentChart === 'chart2' && (
@@ -213,11 +350,25 @@ const PaginaFiltro = () => {
                     {chartType === 'bar' && <Bar data={chartData2} />}
                     {chartType === 'line' && <Line data={chartData2} />}
                     {chartType === 'pie' && <Pie data={chartData2} />}
-                    <p className="chart-description">
-                      "Gráfico de casos por municipio."
-                    </p>
+                    <p className="chart-description">"Gráfico de casos por municipio."</p>
                   </>
                 )}
+                {currentChart === 'chart3' && (
+                <>
+                  {chartType === 'bar' && <Bar data={chartData3} />}
+                  {chartType === 'line' && <Line data={chartData3} />}
+                  {chartType === 'pie' && <Pie data={chartData3} />}
+                  <p className="chart-description">"Cantidad de Resoluciones por Departamento..."</p>
+                </>
+              )}
+              {currentChart === 'chart4' && (
+                <>
+                  {chartType === 'bar' && <Bar data={chartData4} />}
+                  {chartType === 'line' && <Line data={chartData4} />}
+                  {chartType === 'pie' && <Pie data={chartData4} />}
+                  <p className="chart-description">"Cantidad de Resoluciones por Año y Mes..."</p>
+                </>
+              )}
               </div>
             </div>
           ) : (
