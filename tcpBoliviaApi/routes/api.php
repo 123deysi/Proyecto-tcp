@@ -18,7 +18,11 @@ Route::get('/departamentos', [DepartamentoController::class, 'showDepartamentos'
 Route::get('/casos/municipios', [CasoController::class, 'casosPorDepartamentoYMunicipio']);
 Route::get('/resoluciones/departamento-tipo', [CasoController::class, 'resolucionesPorDepartamentoYTipo']);
 Route::get('/resoluciones/por-fecha', [ResolucionController::class, 'resolucionesPorFecha']);
-// Route::get('/casosFechaIngreso', [CasoController::class,'casosPorFechaIngreso']);
+
+Route::get('/resoluciones/por-accion-constitucional', [ResolucionController::class, 'resolucionesPorAccionConstitucional']);
+Route::get('/resoluciones/accion-const', [ResolucionController::class, 'resolucionesPorAccionConst']);
+Route::get('/acciones-constitucionales', [ResolucionController::class, 'accionesConstitucionales']);
+
 Route::get('/unicoGestion', [CasoController::class,'obtenerAniosUnicos']);
 Route::get('/accionConstitucional', [AccionConstitucionalController::class,'showAccionConstitucional']);
 Route::get('/lista/Casos', [CasoController::class,'todosLosAtributos']);

@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Resolucion;
@@ -41,12 +39,9 @@ class ResolucionController extends Controller
             'restiempo' => 'nullable|numeric',
             'caso_id' => 'nullable|exists:casos,id',
         ]);
-
         $resolucion = Resolucion::create($request->all());
-
         return response()->json($resolucion, 201);
     }
-
     /**
      * Muestra una resolución específica.
      *
@@ -58,7 +53,6 @@ class ResolucionController extends Controller
         $resolucion->load(['tipoResolucion', 'tipoResolucion2', 'caso']);
         return response()->json($resolucion);
     }
-
     /**
      * Actualiza una resolución existente en la base de datos.
      *
@@ -81,12 +75,9 @@ class ResolucionController extends Controller
             'restiempo' => 'nullable|numeric',
             'caso_id' => 'nullable|exists:casos,id',
         ]);
-
         $resolucion->update($request->all());
-
         return response()->json($resolucion);
     }
-
     /**
      * Elimina una resolución de la base de datos.
      *
@@ -96,21 +87,82 @@ class ResolucionController extends Controller
     public function destroy(Resolucion $resolucion)
     {
         $resolucion->delete();
-
         return response()->json(null, 204);
     }
-
-
     public function resolucionesPorFecha()
+    {
+        $resolucionesPorFecha = DB::table('resoluciones')
+            ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('MONTH(res_fecha) AS mes'), DB::raw('COUNT(numres2) AS cantidad_resoluciones'))
+            ->whereNotNull('res_fecha')
+            ->groupBy(DB::raw('YEAR(res_fecha), MONTH(res_fecha)'))
+            ->orderBy('anio')
+            ->orderBy('mes')
+            ->get();
+        return response()->json($resolucionesPorFecha);
+    }
+    public function resolucionesPorAccionConstitucional()
+    {
+        $resultados = DB::table('casos as c')
+            ->join('resoluciones as r', 'c.id', '=', 'r.caso_id')
+            ->join('acciones_constitucionales as ac2', 'c.accion_const2_id', '=', 'ac2.id')
+            ->join('subtipos_acciones as sa', 'c.accion_const_id', '=', 'sa.id')
+            ->select(
+                'ac2.nombre as accion_const2_nombre',
+                'sa.nombre as accion_const_nombre',
+                DB::raw('COUNT(r.id) as cantidad_resoluciones')
+            )
+            ->groupBy('ac2.nombre', 'sa.nombre')
+            ->orderBy('ac2.nombre')
+            ->orderBy('sa.nombre')
+            ->get();
+
+        return response()->json($resultados);
+    }
+
+    public function resolucionesPorAccionConst(Request $request)
 {
-    $resolucionesPorFecha = DB::table('resoluciones')
-        ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('MONTH(res_fecha) AS mes'), DB::raw('COUNT(numres2) AS cantidad_resoluciones'))
-        ->whereNotNull('res_fecha')
-        ->groupBy(DB::raw('YEAR(res_fecha), MONTH(res_fecha)'))
-        ->orderBy('anio')
-        ->orderBy('mes')
+    // Obtener el ID de acción constitucional del request, si no se proporciona, será nulo.
+    $accionConst2Id = $request->input('accion_const2_id');
+
+    // Definir la dirección de orden
+    $orderDirection = $request->input('order', 'asc'); // Valor por defecto es 'asc'
+    if (!in_array($orderDirection, ['asc', 'desc'])) {
+        $orderDirection = 'asc'; // Si no es válido, usar 'asc'
+    }
+
+    // Construir la consulta
+    $query = DB::table('casos as c')
+        ->join('resoluciones as r', 'c.id', '=', 'r.caso_id')
+        ->join('acciones_constitucionales as ac2', 'c.accion_const2_id', '=', 'ac2.id')
+        ->join('subtipos_acciones as sa', 'c.accion_const_id', '=', 'sa.id')
+        ->select(
+            'ac2.nombre as accion_const2_nombre',
+            'sa.nombre as accion_const_nombre',
+            DB::raw('COUNT(r.id) as cantidad_resoluciones')
+        );
+
+    // Filtrar por ID si se proporciona
+    if (!empty($accionConst2Id)) {
+        $query->where('c.accion_const2_id', $accionConst2Id);
+    }
+
+    // Agrupar y ordenar resultados
+    $resolucionesPorAccionConst = $query
+        ->groupBy('ac2.nombre', 'sa.nombre')
+        ->orderBy('ac2.nombre', $orderDirection)
+        ->orderBy('sa.nombre', $orderDirection)
         ->get();
 
-    return response()->json($resolucionesPorFecha);
+    return response()->json($resolucionesPorAccionConst);
 }
+
+
+    public function accionesConstitucionales()
+    {
+        $acciones = DB::table('acciones_constitucionales')->select('id', 'nombre')->get();
+        return response()->json($acciones);
+    }
 }
+
+
+

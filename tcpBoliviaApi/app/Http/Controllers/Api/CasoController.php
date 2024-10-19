@@ -196,8 +196,8 @@ public function casosPorDepartamentoYMunicipio(Request $request)
         $conteo = $query->get(); // Obtén todos los casos que cumplen con los filtros
         return response()->json(['conteo' => $conteo]);
     }
-    public function resolucionesPorDepartamentoYTipo() {
-        $resoluciones = DB::table('resoluciones as r')
+    public function resolucionesPorDepartamentoYTipo(Request $request) {
+        $query = DB::table('resoluciones as r')
             ->leftJoin('tipos_resoluciones as tr', 'r.res_tipo_id', '=', 'tr.id')
             ->leftJoin('tipos_resoluciones2 as tr2', 'r.res_tipo2_id', '=', 'tr2.id')
             ->leftJoin('casos as c', 'r.caso_id', '=', 'c.id')
@@ -206,14 +206,22 @@ public function casosPorDepartamentoYMunicipio(Request $request)
             ->select('d.nombre as departamento', 
                      'tr2.descripcion as tipo_resolucion2', 
                      'tr.descripcion as sub_tipo_resolucion', 
-                     DB::raw('COUNT(r.numres2) as cantidad_resoluciones'))
-            ->groupBy('d.nombre', 'tr2.descripcion', 'tr.descripcion')
+                     DB::raw('COUNT(r.numres2) as cantidad_resoluciones'));
+    
+        // Filtrado por departamento
+        if ($request->has('departamento_id')) {
+            $query->where('d.id', $request->departamento_id);
+        }
+    
+        $resoluciones = $query->groupBy('d.nombre', 'tr2.descripcion', 'tr.descripcion')
             ->orderBy('d.nombre', 'asc')
             ->orderBy('tr2.descripcion', 'asc')
             ->orderBy('tr.descripcion', 'asc')
             ->get();
+    
         return response()->json($resoluciones);
     }
+    
     
     
 }
