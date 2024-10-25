@@ -25,6 +25,11 @@ const PaginaFiltro = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [years, setYears] = useState([]);
   const [originalChartData4, setOriginalChartData4] = useState({ labels: [], datasets: [] });
+  const [restipo2Options, setRestipo2Options] = useState([]);
+  const [selectedRestipo2, setSelectedRestipo2] = useState('');
+  const [originalChartData3, setOriginalChartData3] = useState([]);
+
+  const [filteredChartData3, setFilteredChartData3] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +47,6 @@ const PaginaFiltro = () => {
         // Obtener cantidad de resoluciones por año y mes
         const resolucionesPorFechaResponse = await axios.get('http://localhost:8000/api/resoluciones/por-fecha'); // Cambia la URL según sea necesario
         formatChartData4(resolucionesPorFechaResponse.data);
-
         // Obtener años únicos para el select de años
         const uniqueYears = [...new Set(resolucionesPorFechaResponse.data.map(item => item.anio))];
         setYears(uniqueYears);
@@ -52,80 +56,112 @@ const PaginaFiltro = () => {
         // Cargar opciones para el select de acción constitucional 2
         const accionConst2Response = await axios.get('http://localhost:8000/api/acciones-constitucionales'); // Asegúrate de que esta URL sea correcta
         setAccionConst2Options(accionConst2Response.data);
+
+        const tipoResolucionResponse = await axios.get('http://localhost:8000/api/resoluciones/tipo');
+        const uniqueTipos = Array.from(new Set(tipoResolucionResponse.data.map(tipo => tipo.tipo_resolucion2)))
+          .map(tipo => tipoResolucionResponse.data.find(t => t.tipo_resolucion2 == tipo));
+        setRestipo2Options(uniqueTipos); // Solo tipos únicos
       } catch (error) {
         console.error('Error fetching data', error);
         setError('Error fetching data');
       }
     };
-  
     fetchData();
   }, []);
   const handleDepartmentChange = async (e) => {
     const departmentId = e.target.value;
-    // console.log('Selected Department:', departmentId);
     setSelectedDepartment(departmentId);
     try {
-      // Filtrar casos por departamento
       const casesResponse = await axios.get('http://localhost:8000/api/casos', {
         params: { departamento_id: departmentId, order: 'asc' }
       });
       formatChartData1(casesResponse.data);
-      // Filtrar municipios por departamento
       const municipioResponse = await axios.get('http://localhost:8000/api/casos/municipios', {
         params: { departamento_id: departmentId }
       });
       formatChartData2(municipioResponse.data);
-        // Obtener resoluciones por departamento para el gráfico 3
         const resolucionesResponse = await axios.get('http://localhost:8000/api/resoluciones/departamento-tipo', {
           params: departmentId ? { departamento_id: departmentId } : {}
       });
-      console.log('Resoluciones Response Data:', resolucionesResponse.data);
       formatChartData3(resolucionesResponse.data);
-      // console.log('Resoluciones Response Data:', resolucionesResponse.data);
     } catch (error) {
       console.error('Error fetching data', error);
       setError('Error fetching data');
     }
   };
   const handleYearChange = (e) => {
-      const year = e.target.value;
-      setSelectedYear(year);
-      if (year) {
-          // Filtrar datos de resoluciones por fecha según el año seleccionado
-          const filteredData = chartData4.datasets[0].data.filter((item, index) => {
-              const labelYear = chartData4.labels[index].split(' - ')[0]; // Obtiene el año de la etiqueta
-              return labelYear === year; // Compara con el año seleccionado
-          });
-          const filteredLabels = chartData4.labels.filter((label) => label.startsWith(year));
-          setChartData4({
-              labels: filteredLabels,
-              datasets: [
-                  {
-                      label: 'Cantidad de Resoluciones por Fecha',
-                      data: filteredData,
-                      backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                  },
-              ],
-          });
-      } else {
-          // Si se seleccionan "Todos los años", restablecer chartData4 a su estado original
-          setChartData4(originalChartData4); // originalChartData4 debe contener todos los datos originales
-      }
+    const year = e.target.value;
+    setSelectedYear(year);
+    if (year) {
+      // Filtrar etiquetas y datos para el año seleccionado
+      const filteredLabels = originalChartData4.labels.filter(label => {
+        // Extraer el año de la etiqueta, asumiendo que tiene formato "AAAA - Mes"
+        const labelYear = label.split(' - ')[0]; 
+        return labelYear === year; // Comparar con el año seleccionado
+      });
+      const filteredData = originalChartData4.datasets[0].data.filter((_, index) => {
+        const labelYear = originalChartData4.labels[index].split(' - ')[0];
+        return labelYear === year; // Filtrar solo los datos correspondientes al año
+      });
+      setChartData4({
+        labels: filteredLabels,
+        datasets: [
+          {
+            label: `Resoluciones del año ${year}`,
+            data: filteredData,
+            borderColor: 'rgba(255, 206, 86, 0.6)',
+            backgroundColor: 'rgba(255, 206, 86, 0.6)',
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      });
+    } else {
+      setChartData4(originalChartData4);
+    }
   };
+  const handleRestipo2Change = (e) => {
+    const tipoResolucion = e.target.value;
+    console.log('Selected Resolucion Type:', tipoResolucion);
+    setSelectedRestipo2(tipoResolucion);
+
+    console.log('Original Data for Chart 3 before filtering:', originalChartData3);
+
+    if (tipoResolucion === "") {
+        // Restaurar todos los datos si se selecciona "todos"
+        console.log('No Resolucion Type selected, restoring original data for Chart 3');
+        setFilteredChartData3(originalChartData3); // Restore all data
+        formatChartData3(originalChartData3); // Formatea la gráfica con datos originales
+    } else {
+        // Filtrar los datos basados en el tipo de resolución seleccionado
+        const filteredData = originalChartData3.filter(item => {
+            const itemTipoResolucion = item.tipo_resolucion2.toString(); // Asegúrate de convertir a cadena
+            console.log(`Comparing: ${itemTipoResolucion} with ${tipoResolucion}`);
+            return itemTipoResolucion === tipoResolucion; // Comparación ajustada
+        });
+
+        if (filteredData.length === 0) {
+            console.log('No data found for the selected Resolucion Type');
+            setChartData3({ labels: [], datasets: [] });
+            setError('No valid data for chart 3');
+        } else {
+            console.log('Filtered Data for Chart 3:', filteredData);
+            setFilteredChartData3(filteredData); // Guardamos los datos filtrados
+            formatChartData3(filteredData); // Llamada a la función para formatear los datos filtrados
+        }
+    }
+};
   const handleAccionConst2Change = async (e) => {
       const accionConst2Id = e.target.value;
       console.log('Selected Accion Const2 ID:', accionConst2Id); // Agregar esta línea
       setSelectedAccionConst2(accionConst2Id);
       try {
           let resolucionesResponse;
-
           if (accionConst2Id) {
-              // Si hay un ID seleccionado, filtra por él
               resolucionesResponse = await axios.get('http://localhost:8000/api/resoluciones/accion-const', {
                   params: { accion_const2_id: accionConst2Id, order: 'asc' }
               });
           } else {
-              // Si no hay ID seleccionado, obtiene todas las resoluciones
               resolucionesResponse = await axios.get('http://localhost:8000/api/resoluciones/accion-const', {
                   params: { order: 'asc' } // O solo omite el ID
               });
@@ -176,31 +212,39 @@ const PaginaFiltro = () => {
   };
   const formatChartData3 = (data) => {
     if (!data || !Array.isArray(data)) {
+        console.error('Invalid data format for Chart 3');
         setError('Invalid data format');
         return;
     }
-    const filteredData = data.filter(item => 
-        item.departamento && item.tipo_resolucion2 && item.sub_tipo_resolucion && item.cantidad_resoluciones
+
+    // Guarda los datos originales antes de filtrar
+    setOriginalChartData3(data); // Asegúrate de que aquí tengas los datos originales
+
+    // Filtrar datos válidos para la gráfica
+    const validData = data.filter(item => 
+        item.departamento && 
+        item.tipo_resolucion2 && 
+        item.sub_tipo_resolucion && 
+        item.cantidad_resoluciones !== null && 
+        item.cantidad_resoluciones >= 0
     );
-    if (filteredData.length === 0) {
-        // Here, instead of setting an error, you can set the chart data to be empty
-        console.log('No valid data for chart 3'); // Log the situation
-        setChartData3({ labels: [], datasets: [] }); // Clear data
+
+    if (validData.length === 0) {
+        console.log('No valid data for chart 3');
+        setChartData3({ labels: [], datasets: [] });
+        setError('No valid data for chart 3');
         return; 
     }
-    const labels = filteredData.map(item => `${item.departamento} - ${item.tipo_resolucion2} - ${item.sub_tipo_resolucion}`);
-    const counts = filteredData.map(item => item.cantidad_resoluciones);
-    if (labels.length !== counts.length) {
-        setError('Data length mismatch in chart 3');
-        return;
-    }
+
+    const labels = validData.map(item => `${item.departamento} - ${item.tipo_resolucion2} - ${item.sub_tipo_resolucion}`);
+    const counts = validData.map(item => item.cantidad_resoluciones);
     setChartData3({
         labels,
         datasets: [
             {
                 label: 'Cantidad de Resoluciones',
                 data: counts,
-                backgroundColor: 'rgba(153, 102, 255, 0.6)', // Color personalizable
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
             },
         ],
     });
@@ -236,6 +280,7 @@ const PaginaFiltro = () => {
               },
           ],
       });
+      
   };
     const formatChartData5 = (data) => {
       if (!data || !Array.isArray(data)) {
@@ -386,24 +431,38 @@ const PaginaFiltro = () => {
             <i className="fa fa-arrow-left"></i> Atrás
           </a>
         </div>
-        <select onChange={handleDepartmentChange} value={selectedDepartment} className="select-departamento">
-          <option value=''>Todos los departamentos</option>
-          {departments.map(department => (
-            <option key={department.id} value={department.id}>{department.nombre}</option>
-          ))}
-        </select>
-        <select onChange={handleAccionConst2Change} value={selectedAccionConst2} className="select-accion-const2 select-departamento">
-          <option value=''>Selecciona Acción Constitucional 2</option>
-          {accionConst2Options.map(option => (
-            <option key={option.id} value={option.id}>{option.nombre}</option>
-          ))}
-        </select>
-        <select onChange={handleYearChange} value={selectedYear} className="select-year select-departamento">
-          <option value=''>Selecciona un año</option>
-          {years.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
-        </select>
+        {currentChart !== 'chart4' && currentChart !== 'chart5' && (
+          <select onChange={handleDepartmentChange} value={selectedDepartment} className="select-departamento">
+            <option value=''>Todos los departamentos</option>
+            {departments.map(department => (
+              <option key={department.id} value={department.id}>{department.nombre}</option>
+            ))}
+          </select>)}
+        {currentChart === 'chart3' && (
+            <select id="restipo2" value={selectedRestipo2} onChange={handleRestipo2Change} className="select-departamento">
+              <option value=''>Seleccione un tipo de resolución</option>
+              {restipo2Options.map((tipo,index) => (
+                <option key={tipo.id || index} value={tipo.tipo_resolucion2}>
+                  {tipo.tipo_resolucion2}
+                </option>
+              ))}
+            </select>)}
+        {currentChart === 'chart4' && (
+            <>
+                <select onChange={handleYearChange} value={selectedYear} className="select-year select-departamento">
+                    <option value=''>Selecciona un año</option>
+                    {years.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>  
+            </>)}
+        {currentChart === 'chart5' && (
+          <select onChange={handleAccionConst2Change} value={selectedAccionConst2} className="select-accion-const2 select-departamento">
+            <option value=''>Selecciona Acción Constitucional 2</option>
+            {accionConst2Options.map(option => (
+              <option key={option.id} value={option.id}>{option.nombre}</option>
+            ))}
+          </select>)}
         <div className="view-toggle">
           <button id='GraficoDatos' onClick={() => setViewType('chart')} className={viewType === 'chart' ? 'active' : ''}>Gráfica</button>
           <button id='TablaDatos' onClick={() => setViewType('table')} className={viewType === 'table' ? 'active' : ''}>Tabla</button>

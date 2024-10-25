@@ -16,7 +16,11 @@ Route::post('/upload', [ExcelController::class, 'upload']);
 Route::get('/casos', [CasoController::class, 'casosPorDepartamento']);
 Route::get('/departamentos', [DepartamentoController::class, 'showDepartamentos']);
 Route::get('/casos/municipios', [CasoController::class, 'casosPorDepartamentoYMunicipio']);
+
 Route::get('/resoluciones/departamento-tipo', [CasoController::class, 'resolucionesPorDepartamentoYTipo']);
+Route::get('/resoluciones/tipo', [CasoController::class, 'resolucionesPorTipo2']);
+
+
 Route::get('/resoluciones/por-fecha', [ResolucionController::class, 'resolucionesPorFecha']);
 
 Route::get('/resoluciones/por-accion-constitucional', [ResolucionController::class, 'resolucionesPorAccionConstitucional']);
