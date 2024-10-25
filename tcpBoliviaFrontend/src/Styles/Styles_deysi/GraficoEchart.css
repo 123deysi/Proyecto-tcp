@@ -1,0 +1,23 @@
+.contenedor_GraficoCasos_Echart {
+    display: flex;
+    justify-content: space-between; /* Asegura que haya espacio entre los dos elementos */
+    align-items: stretch; /* Alinea los elementos en altura */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    height: 500px; /* Altura del contenedor, ajusta según lo que necesites */
+    gap: 20px; /* Espacio entre las dos gráficas */
+  }
+  
+  
+  .grafico-casos-container, .echart-container {
+    flex: 1; /* Ambos elementos ocuparán el mismo espacio proporcionalmente */
+    height: 100%; /* Ambos ocuparán toda la altura del contenedor padre */
+  }
+  
+  .grafico-casos-container {
+    /* Estilos adicionales para el gráfico de casos si es necesario */
+  }
+  
+  .echart-container {
+    /* Estilos adicionales para el EChart si es necesario */
+  }
+  

@@ -11,9 +11,9 @@
   flex-direction: column;
   flex: 1;
   background-color: #f5f5f5; /* Color de fondo más suave */
-  border-radius: 12px; /* Bordes más redondeados para un diseño moderno */
+  border-radius:12px; /* Bordes más redondeados para un diseño moderno */
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra más sutil y difusa */
+  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra más sutil y difusa */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   max-width: 300px; /* Definir un ancho máximo */
   margin: 10px; /* Añadir un margen entre las tarjetas */
@@ -25,22 +25,24 @@
 }
 
 .card-header-estadisticas {
-  background-color: #777; /* Color primario más oscuro para mayor contraste */
+  background-color:#892943;
+ /* background-color: #777; /* Color primario más oscuro para mayor contraste */
   color: #fff;
   padding: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  font-weight: 600;
+  font-weight: 100;
   font-size: 16px; /* Tamaño de fuente más grande */
   white-space: nowrap;
 }
 
 .card-body-estadisticas {
-  padding: 10px;
-  background-color: #ffffff; /* Fondo blanco para mejor legibilidad */
-  color: #333; /* Texto más oscuro para mejor contraste */
+  padding: 5px;
+  background-color: #e6ebec; /* Fondo blanco para mejor legibilidad */
+  color: #000000; /* Texto más oscuro para mejor contraste */
+  
   font-size: 16px; /* Tamaño del número más grande para destacar */
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .card-body-estadisticas p {

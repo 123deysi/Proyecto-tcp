@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Caso;
+use App\Models\Resolucion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -222,6 +223,26 @@ public function casosPorDepartamentoYMunicipio(Request $request)
         return response()->json($resoluciones);
     }
     
+    //PARA OBTENER EL TOTAL DE CASOS 
+
+    public function contarCasosYResoluciones()
+    {
+        // Contar el total de casos
+        $totalCasos = DB::table('casos')->count();
+
+        // Contar el total de resoluciones
+        $totalResoluciones = DB::table('resoluciones')->count();
+
+        // Calcular los casos no resueltos
+        $casosNoResueltos = $totalCasos - $totalResoluciones;
+
+        // Retornar el resultado como JSON
+        return response()->json([
+            'total_casos' => $totalCasos,
+            'total_resoluciones' => $totalResoluciones,
+            'casos_no_resueltos' => $casosNoResueltos,
+        ]);
+    }
     
     
 }
