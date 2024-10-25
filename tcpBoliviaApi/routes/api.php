@@ -40,6 +40,7 @@ Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 //estadistica de total casos y causas resueltos 
 Route::get('/contar/casos/resoluciones', [CasoController::class, 'contarCasosYResoluciones']);
+Route::get('resoluciones/departamento', [ResolucionController::class, 'resolucionesPorDepartamento']);
 
 
 

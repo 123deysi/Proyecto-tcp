@@ -73,6 +73,7 @@ const MapaBolivia = () => {
         stroke="#ffffff"
         strokeLinecap="round"
         strokeLinejoin="round"
+        
         strokeWidth=".5"
         version="1.2"
         viewBox="0 0 1000 1000"

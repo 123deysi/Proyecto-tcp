@@ -34,12 +34,12 @@ const Estadisticas = () => {
       </div>
 
       <div className="card-estadisticas">
-        <div className="card-header-estadisticas">Casos resueltos</div>
+        <div className="card-header-estadisticas">Causas resueltos</div>
         <div className="card-body-estadisticas">{data.total_resoluciones}</div>
       </div>
 
       <div className="card-estadisticas">
-        <div className="card-header-estadisticas">Casos no resueltos</div>
+        <div className="card-header-estadisticas">Causas no resueltos</div>
         <div className="card-body-estadisticas">{data.casos_no_resueltos}</div>
       </div>
 

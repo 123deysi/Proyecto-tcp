@@ -256,9 +256,7 @@ public function casosPorDepartamentoYMunicipio(Request $request)
         return response()->json($resoluciones);
     }
     
-}
 
-    
     
 
     

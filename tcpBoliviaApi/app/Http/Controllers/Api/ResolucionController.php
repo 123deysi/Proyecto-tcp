@@ -162,6 +162,20 @@ class ResolucionController extends Controller
         $acciones = DB::table('acciones_constitucionales')->select('id', 'nombre')->get();
         return response()->json($acciones);
     }
+
+    public function resolucionesPorDepartamento()
+{
+    $resolucionesPorDepartamento = DB::table('resoluciones as r')
+        ->join('casos as c', 'r.caso_id', '=', 'c.id')
+        ->join('departamentos as d', 'c.departamento_id', '=', 'd.id') // Asegúrate de que esta relación exista
+        ->select('d.nombre as departamento_nombre', DB::raw('COUNT(r.id) as cantidad_resoluciones'))
+        ->groupBy('d.nombre')
+        ->orderBy('cantidad_resoluciones', 'desc') // Para ordenar por cantidad
+        ->get();
+
+    return response()->json($resolucionesPorDepartamento);
+}
+
 }
 
 
