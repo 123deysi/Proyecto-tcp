@@ -214,6 +214,11 @@ public function casosPorDepartamentoYMunicipio(Request $request)
             $query->where('d.id', $request->departamento_id);
         }
     
+        // Filtrado por tipo_resolucion2
+        if ($request->has('res_tipo2')) {
+            $query->where('tr2.descripcion', $request->res_tipo2);
+        }
+    
         $resoluciones = $query->groupBy('d.nombre', 'tr2.descripcion', 'tr.descripcion')
             ->orderBy('d.nombre', 'asc')
             ->orderBy('tr2.descripcion', 'asc')
@@ -222,6 +227,40 @@ public function casosPorDepartamentoYMunicipio(Request $request)
     
         return response()->json($resoluciones);
     }
+
+    public function resolucionesPorTipo2(Request $request) {
+        $query = DB::table('resoluciones as r')
+            ->leftJoin('tipos_resoluciones2 as tr2', 'r.res_tipo2_id', '=', 'tr2.id')
+            ->leftJoin('casos as c', 'r.caso_id', '=', 'c.id')
+            ->leftJoin('municipios as m', 'c.municipio_id', '=', 'm.id')
+            ->leftJoin('departamentos as d', 'm.departamento_id', '=', 'd.id')
+            ->select('d.nombre as departamento', 
+                     'tr2.descripcion as tipo_resolucion2', 
+                     DB::raw('COUNT(r.numres2) as cantidad_resoluciones'));
+    
+        // Filtrado por departamento
+        if ($request->has('departamento_id')) {
+            $query->where('d.id', $request->departamento_id);
+        }
+    
+        // Filtrado por tipo_resolucion2
+        if ($request->has('res_tipo2')) {
+            $query->where('tr2.descripcion', $request->res_tipo2);
+        }
+    
+        $resoluciones = $query->groupBy('d.nombre', 'tr2.descripcion')
+            ->orderBy('d.nombre', 'asc')
+            ->orderBy('tr2.descripcion', 'asc')
+            ->get();
+    
+        return response()->json($resoluciones);
+    }
+    
+}
+
+    
+    
+
     
     //PARA OBTENER EL TOTAL DE CASOS 
 
