@@ -3,7 +3,7 @@
   justify-content: space-between;
   gap: 24px; /* Reducir un poco el gap para un diseño más compacto */
   flex-wrap: wrap; /* Asegura que las tarjetas se ajusten en pantallas pequeñas */
-  padding: 20px;
+  padding: 10px;
 }
 
 .card-estadisticas {

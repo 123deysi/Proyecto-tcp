@@ -59,4 +59,7 @@ class Caso extends Model
     {
         $this->attributes['fecha_ingreso'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
     }
+
+
+    
 }

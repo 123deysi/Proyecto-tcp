@@ -28,6 +28,8 @@ Route::get('/resoluciones/accion-const', [ResolucionController::class, 'resoluci
 Route::get('/acciones-constitucionales', [ResolucionController::class, 'accionesConstitucionales']);
 
 Route::get('/unicoGestion', [CasoController::class,'obtenerAniosUnicos']);
+
+Route::get('/casosPorAnio', [CasoController::class,'casosPorAnios']);
 Route::get('/accionConstitucional', [AccionConstitucionalController::class,'showAccionConstitucional']);
 Route::get('/lista/Casos', [CasoController::class,'todosLosAtributos']);
 Route::get('/obtenerDatosIniciales', [DatosInicialesController::class, 'obtenerDatosIniciales']);

@@ -300,6 +300,7 @@ const PaginaFiltro = () => {
         ],
       });
     };
+    //renderiza segun la selecion de graficos 
     const renderTable = () => {
     if (currentChart === 'chart1') {
       return (
@@ -427,7 +428,7 @@ const PaginaFiltro = () => {
       <div className="contenedor_principal">
         <div className="card-header bg-dorado d-flex align-items-center" role="tab">
           <h3 className="font-weight-bold mb-0"><i className="fa fa-filter"></i> Filtrar Resultado de casos y resoluciones</h3>
-          <a href="/Inicio" className="btn btn-outline-dark font-weight-bold ml-auto">
+          <a href="/Dinamicas" className="btn btn-outline-dark font-weight-bold ml-auto">
             <i className="fa fa-arrow-left"></i> Atrás
           </a>
         </div>
@@ -475,9 +476,14 @@ const PaginaFiltro = () => {
         <select onChange={(e) => setCurrentChart(e.target.value)} value={currentChart} className="select-grafico">
           <option value='chart1'>Gráfico por Departamento</option>
           <option value='chart2'>Gráfico por Municipio</option>
+         
+          <option value='chart5'>Gráfico por Acción Constitucional</option> 
+        </select>
+        <select onChange={(e) => setCurrentChart(e.target.value)} value={currentChart} className="select-grafico">
+         
           <option value='chart3'>Gráfico por Resoluciones</option>
           <option value='chart4'>Gráfico por Fecha (Año-Mes)</option> 
-          <option value='chart5'>Gráfico por Acción Constitucional</option> 
+         
         </select>
         <div className="contenedor-dinamico-cuadro">
         {viewType === 'chart' ? (

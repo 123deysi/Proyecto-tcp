@@ -89,6 +89,19 @@ public function obtenerAniosUnicos()
         ->pluck('año');
     return response()->json($aniosUnicos);
 }
+public function casosPorAnios(Request $request)
+{
+    // Contar los casos agrupados por el año de la fecha de ingreso en formato YYYY-MM-DD
+    $casosPorAnio = DB::table('casos')
+        ->selectRaw('YEAR(fecha_ingreso) as anio, COUNT(*) as cantidad')
+        ->groupBy('anio')
+        ->orderBy('anio', 'asc')
+        ->get();
+
+    // Retornar los datos en formato JSON
+    return response()->json($casosPorAnio);
+}
+
 public function casosPorDepartamento(Request $request)
 {
     $departamento_id = $request->query('departamento_id');
@@ -272,7 +285,7 @@ public function casosPorDepartamentoYMunicipio(Request $request)
 
         // Calcular los casos no resueltos
         $casosNoResueltos = $totalCasos - $totalResoluciones;
-
+        
         // Retornar el resultado como JSON
         return response()->json([
             'total_casos' => $totalCasos,
