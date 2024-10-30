@@ -154,20 +154,17 @@ class ExcelImport implements ToCollection, WithHeadingRow
 
                     // Manejo de la fecha de ingreso
                     if (isset($row['fecha_ingreso']) && !empty($row['fecha_ingreso'])) {
-                        try {
-                            $fechaIngreso = Carbon::createFromFormat('d/m/Y', $row['fecha_ingreso']);
-                            if ($fechaIngreso) {
-                                $caso->fecha_ingreso = $fechaIngreso->format('Y-m-d');
-                                Log::info('Fecha de ingreso convertida: ' . $caso->fecha_ingreso);
-                            }
-                        } catch (\Exception $e) {
-                            Log::error('Error en la conversión de fecha_ingreso: ' . $e->getMessage());
-                            $caso->fecha_ingreso = null; // Asignar null en caso de error
-                        }
+                        Log::info('Fecha de ingreso recibida: ' . $row['fecha_ingreso']);
+                        
+                        // Asignar la fecha directamente sin conversión
+                        $caso->fecha_ingreso = $row['fecha_ingreso'];
+                        Log::info('Fecha de ingreso asignada: ' . $caso->fecha_ingreso);
                     } else {
                         Log::info('No se proporcionó fecha de ingreso. Asignando null.');
                         $caso->fecha_ingreso = null; // Asignar null si no hay fecha
                     }
+                    
+
                     // Guardar el caso
                     if (!$caso->save()) {
                         Log::error('Error al guardar el caso: ' . json_encode($caso->getErrors()));

@@ -3,7 +3,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Caso extends Model
 {
@@ -47,6 +46,7 @@ class Caso extends Model
     {
         return $this->belongsTo(Municipio::class, 'municipio_id');
     }
+<<<<<<< HEAD
 
     // Accesor para formatear la fecha cuando se lee desde el modelo
     public function getFechaIngresoAttribute($value)
@@ -62,4 +62,6 @@ class Caso extends Model
 
 
     
+=======
+>>>>>>> ea763639594b34ede0b282b136e6aba82d18378a
 }

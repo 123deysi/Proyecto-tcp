@@ -46,11 +46,12 @@ class ExcelImport implements ToCollection
                     'res_emisor'      => $row[14] ?? null,
                     'departamento_id' => $row[15] ?? null,
                     'municipio_id'    => $row[16] ?? null,
-                    'fecha_ingreso'   => isset($row[17]) && !empty($row[17]) ? \Carbon\Carbon::parse($row[17])->format('Y-m-d') : null,
+                    'fecha_ingreso'   => $row[17] ?? null, // Asignar directamente sin conversión
                 ]);
             } catch (\Exception $e) {
                 Log::error('Error al guardar la fila: ' . json_encode($row) . ' - Error: ' . $e->getMessage());
             }
+            
         }
     }
 }
