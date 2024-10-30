@@ -28,16 +28,16 @@ class Resolucion extends Model
     ];
 
     // Accesor para formatear la fecha cuando se lee desde el modelo
-    public function getFechaAttribute($value)
-    {
-        return $value ? Carbon::parse($value)->format('d/m/Y') : null;
-    }
+    // public function getFechaAttribute($value)
+    // {
+    //     return $value ? Carbon::parse($value)->format('d/m/Y') : null;
+    // }
 
-    // Mutador para convertir la fecha a un formato específico antes de guardar
-    public function setFechaAttribute($value)
-    {
-        $this->attributes['fecha'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
-    }
+    // // Mutador para convertir la fecha a un formato específico antes de guardar
+    // public function setFechaAttribute($value)
+    // {
+    //     $this->attributes['res_fecha'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
+    // }
 
     // Accesor para manipular 'res_mes' si es necesario
     public function getResMesAttribute($value)
@@ -45,11 +45,11 @@ class Resolucion extends Model
         return $value ? Carbon::parse($value)->format('d/m/Y') : null;
     }
 
-    // Mutador para modificar 'res_mes' antes de guardarlo
-    public function setResMesAttribute($value)
-    {
-        $this->attributes['res_mes'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
-    }
+    // // Mutador para modificar 'res_mes' antes de guardarlo
+    // public function setResMesAttribute($value)
+    // {
+    //     $this->attributes['res_mes'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
+    // }
 
     public function tipoResolucion()
     {

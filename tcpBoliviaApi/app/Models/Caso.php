@@ -3,7 +3,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Caso extends Model
 {
@@ -46,17 +45,5 @@ class Caso extends Model
     public function municipio()
     {
         return $this->belongsTo(Municipio::class, 'municipio_id');
-    }
-
-    // Accesor para formatear la fecha cuando se lee desde el modelo
-    public function getFechaIngresoAttribute($value)
-    {
-        return $value ? Carbon::parse($value)->format('d/m/Y') : null;
-    }
-
-    // Mutador para convertir la fecha a un formato específico antes de guardar
-    public function setFechaIngresoAttribute($value)
-    {
-        $this->attributes['fecha_ingreso'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
     }
 }
