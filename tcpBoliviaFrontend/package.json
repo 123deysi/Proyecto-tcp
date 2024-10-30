@@ -18,6 +18,8 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "d3": "^7.9.0",
+    "d3-array": "^3.2.4",
     "docx": "^8.5.0",
     "dotenv": "^16.4.5",
     "echarts": "^5.5.0",
