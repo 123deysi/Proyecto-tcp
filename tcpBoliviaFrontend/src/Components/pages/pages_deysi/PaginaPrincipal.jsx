@@ -70,7 +70,7 @@ const PaginaPrincipal = () => {
             onClick={handleFilterClick}
           >
             <FontAwesomeIcon icon={faFilter} className="icono-filtro" />
-            <span>Explorar Resultados de Casos y Resoluciones</span>
+            <span>Explorar Resultados de Causas y Resoluciones</span>
           </button>
 
           <button
@@ -81,6 +81,7 @@ const PaginaPrincipal = () => {
             <span>Retroceder</span>
           </button>
         </div>
+        
         <div className='descarga'>
         <Descargas targetId="contenedor-dinamico-cuadro" />
         </div>

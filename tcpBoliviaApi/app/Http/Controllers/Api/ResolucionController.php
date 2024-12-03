@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Resolucion;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+
 
 class ResolucionController extends Controller
 {
@@ -95,11 +97,13 @@ class ResolucionController extends Controller
             ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('MONTH(res_fecha) AS mes'), DB::raw('COUNT(numres2) AS cantidad_resoluciones'))
             ->whereNotNull('res_fecha')
             ->groupBy(DB::raw('YEAR(res_fecha), MONTH(res_fecha)'))
-            ->orderBy('anio')
-            ->orderBy('mes')
+            ->orderBy(DB::raw('YEAR(res_fecha)'))
+            ->orderBy(DB::raw('MONTH(res_fecha)'))
             ->get();
+    
         return response()->json($resolucionesPorFecha);
     }
+    
     public function resolucionesPorAccionConstitucional()
     {
         $resultados = DB::table('casos as c')
@@ -165,6 +169,10 @@ class ResolucionController extends Controller
 
     public function resolucionesPorDepartamento()
 {
+    // Obtener el total de resoluciones
+    $totalResoluciones = DB::table('resoluciones')->count();
+
+    // Obtener las resoluciones por departamento
     $resolucionesPorDepartamento = DB::table('resoluciones as r')
         ->join('casos as c', 'r.caso_id', '=', 'c.id')
         ->join('departamentos as d', 'c.departamento_id', '=', 'd.id') // Asegúrate de que esta relación exista
@@ -173,8 +181,94 @@ class ResolucionController extends Controller
         ->orderBy('cantidad_resoluciones', 'desc') // Para ordenar por cantidad
         ->get();
 
+    // Calcular el porcentaje para cada departamento
+    $resolucionesPorDepartamento = $resolucionesPorDepartamento->map(function ($item) use ($totalResoluciones) {
+        $item->porcentaje = $totalResoluciones > 0 ? number_format(($item->cantidad_resoluciones / $totalResoluciones) * 100, 2) : '0.00';
+        return $item;
+    });
+
     return response()->json($resolucionesPorDepartamento);
 }
+
+
+    
+
+public function resolucionesPorAnio()
+{
+    // Consulta para obtener el conteo de resoluciones agrupadas por año
+    $resolucionesPorAnio = DB::table('resoluciones')
+        ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('COUNT(id) AS cantidad_resoluciones'))
+        ->whereNotNull('res_fecha') // Asegurarse de que res_fecha no sea nulo
+        ->groupBy(DB::raw('YEAR(res_fecha)'))
+        ->orderBy('anio', 'asc') // Ordenar por año de forma ascendente
+        ->get();
+
+    // Retornar el resultado en formato JSON
+    return response()->json($resolucionesPorAnio);
+}
+
+public function obtenerTiemposDeResolucion(): JsonResponse
+    {
+       // Agrupar por año y mes, y calcular el promedio de restiempo
+    $tiempoPromedioPorFecha = DB::table('resoluciones')
+    ->select(DB::raw('YEAR(res_fecha) AS anio'), DB::raw('MONTH(res_fecha) AS mes'), DB::raw('AVG(restiempo) AS Tiempo_promedio_resolucion'))
+    ->whereNotNull('res_fecha')
+    ->groupBy(DB::raw('YEAR(res_fecha), MONTH(res_fecha)'))
+    ->orderBy(DB::raw('YEAR(res_fecha)'))
+    ->orderBy(DB::raw('MONTH(res_fecha)'))
+    ->get();
+
+return response()->json($tiempoPromedioPorFecha);
+    }
+
+
+    public function resolucionesPorFondo(Request $request)
+{
+    $resFondoVoto = $request->input('res_fondo_voto');
+
+    // Si se pasa un valor específico para 'res_fondo_voto', se filtra
+    if ($resFondoVoto) {
+        $resoluciones = DB::table('resoluciones')
+            ->where('res_fondo_voto', $resFondoVoto) // Filtra por el valor seleccionado
+            ->select('res_fondo_voto', DB::raw('COUNT(*) as cantidad_resoluciones'))
+            ->groupBy('res_fondo_voto')
+            ->get();
+    } else {
+        // Si no se pasa un filtro, excluye el valor "97" de los resultados
+        $resoluciones = DB::table('resoluciones')
+            ->where('res_fondo_voto', '!=', '97') // Excluye el valor 97
+            ->select('res_fondo_voto', DB::raw('COUNT(*) as cantidad_resoluciones'))
+            ->groupBy('res_fondo_voto')
+            ->get();
+    }
+
+    return response()->json($resoluciones);
+}
+
+public function resolucionesPorRelator()
+{
+    // Obtener el total de resoluciones
+    $totalResoluciones = DB::table('resoluciones')->count();
+
+    // Obtener las resoluciones por relator, excluyendo los valores null
+    $resolucionesPorRelator = DB::table('resoluciones as r')
+        ->join('casos as c', 'r.caso_id', '=', 'c.id')
+        ->select('r.relator as relator_id', DB::raw('COUNT(r.id) as cantidad_resoluciones'))
+        ->whereNotNull('r.relator')  // Filtrar los casos con relator no nulo
+        ->groupBy('r.relator')
+        ->orderBy('cantidad_resoluciones', 'desc') // Para ordenar por cantidad
+        ->get();
+
+    // Calcular el porcentaje para cada relator
+    $resolucionesPorRelator = $resolucionesPorRelator->map(function ($item) use ($totalResoluciones) {
+        $item->porcentaje = $totalResoluciones > 0 ? number_format(($item->cantidad_resoluciones / $totalResoluciones) * 100, 2) : '0.00';
+        return $item;
+    });
+
+    return response()->json($resolucionesPorRelator);
+}
+
+
 
 }
 

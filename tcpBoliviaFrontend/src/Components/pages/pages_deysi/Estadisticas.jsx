@@ -43,10 +43,7 @@ const Estadisticas = () => {
         <div className="card-body-estadisticas">{data.casos_no_resueltos}</div>
       </div>
 
-      <div className="card-estadisticas">
-        <div className="card-header-estadisticas">Causas ingresadas</div>
-        <div className="card-body-estadisticas">{data.casos_no_resueltos}</div>
-      </div>
+      
 
     </div>
     

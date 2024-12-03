@@ -4,7 +4,7 @@
 }
 
 .letra {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -19,7 +19,11 @@
 
 
 .contenedor-dinamico-cuadro {
-  margin-top: 20px;
+  
+  overflow: hidden; /* Evita que el contenido se salga del contenedor */
+  max-width: 100%;  /* Asegura que el contenedor no se extienda más allá del ancho de su padre */
+
+
 }
 
 .contenedor-dinamico {

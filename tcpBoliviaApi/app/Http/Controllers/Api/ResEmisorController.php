@@ -41,8 +41,11 @@ class ResEmisorController extends Controller
      * @param  \App\Models\ResEmisor  $sala
      * @return \Illuminate\Http\Response
      */
-    public function show(ResEmisor $resEmisor)
+    public function showResEmisor(ResEmisor $resEmisor)
     {
+
+        $resEmisor = ResEmisor::all();
+
         return response()->json($resEmisor);
     }
 

@@ -59,27 +59,19 @@ class CasoController extends Controller
         return response()->json($caso);
     }
     public function casosPorFechaIngreso()
-    {
-        $casosPorFechaIngreso = DB::table('casos')
-            ->select(DB::raw('YEAR(fecha_ingreso) AS anio'), DB::raw('MONTH(fecha_ingreso) AS mes'), DB::raw('COUNT(id) AS cantidad_resoluciones'))
-            ->groupBy(DB::raw('YEAR(fecha_ingreso)'), DB::raw('MONTH(fecha_ingreso)'))
-            ->orderBy(DB::raw('YEAR(fecha_ingreso)'), 'asc')
-            ->orderBy(DB::raw('MONTH(fecha_ingreso)'), 'asc')
-            ->get();
-    
-        return response()->json($casosPorFechaIngreso);
-    }
-// public function casosPorFechaIngreso()
-// {
-//     // Obtener casos agrupados por año de fecha_ingreso y contar la cantidad de casos
-//     $casosPorFechaIngreso = DB::table('casos')
-//         ->select(DB::raw('YEAR(fecha_ingreso) AS año'), DB::raw('COUNT(id) AS cantidad_casos'))
-//         ->groupBy(DB::raw('YEAR(fecha_ingreso)'))
-//         ->orderBy(DB::raw('YEAR(fecha_ingreso)'), 'asc')
-//         ->get();
+{
+    $casosPorFechaIngreso = DB::table('casos')
+        ->select(DB::raw('YEAR(fecha_ingreso) AS anio'), DB::raw('MONTH(fecha_ingreso) AS mes'), DB::raw('COUNT(id) AS cantidad_casos'))
+        ->whereNotNull('fecha_ingreso') // Excluir registros con fecha_ingreso null
+        ->groupBy(DB::raw('YEAR(fecha_ingreso)'), DB::raw('MONTH(fecha_ingreso)'))
+        ->orderBy(DB::raw('YEAR(fecha_ingreso)'), 'asc')
+        ->orderBy(DB::raw('MONTH(fecha_ingreso)'), 'asc')
+        ->get();
 
-//     return response()->json($casosPorFechaIngreso);
-// }
+    return response()->json($casosPorFechaIngreso);
+}
+
+
 public function obtenerAniosUnicos()
 {
     $aniosUnicos = DB::table('casos')
@@ -89,18 +81,33 @@ public function obtenerAniosUnicos()
         ->pluck('año');
     return response()->json($aniosUnicos);
 }
-public function casosPorAnios(Request $request)
+public function casosPorPeriodo() {
+    $resultados = DB::table('casos')
+    ->selectRaw('YEAR(fecha_ingreso) as anio, MONTH(fecha_ingreso) as mes, COUNT(*) as cantidad_casos')
+    ->whereNotNull('fecha_ingreso')
+    ->groupBy('anio', 'mes')
+    ->orderBy('anio', 'asc')
+    ->orderBy('mes', 'asc')
+    ->get();
+
+return response()->json($resultados);
+}
+
+public function casosPorAnio()
 {
-    // Contar los casos agrupados por el año de la fecha de ingreso en formato YYYY-MM-DD
+    // Consulta para obtener el conteo de resoluciones agrupadas por año
     $casosPorAnio = DB::table('casos')
-        ->selectRaw('YEAR(fecha_ingreso) as anio, COUNT(*) as cantidad')
-        ->groupBy('anio')
-        ->orderBy('anio', 'asc')
+        ->select(DB::raw('YEAR(fecha_ingreso) AS anio'), DB::raw('COUNT(id) AS cantidad_casos'))
+        ->whereNotNull('fecha_ingreso') // Asegurarse de que res_fecha no sea nulo
+        ->groupBy(DB::raw('YEAR(fecha_ingreso)'))
+        ->orderBy('anio', 'asc') // Ordenar por año de forma ascendente
         ->get();
 
-    // Retornar los datos en formato JSON
+    // Retornar el resultado en formato JSON
     return response()->json($casosPorAnio);
 }
+
+
 
 public function casosPorDepartamento(Request $request)
 {
@@ -279,13 +286,10 @@ public function casosPorDepartamentoYMunicipio(Request $request)
     {
         // Contar el total de casos
         $totalCasos = DB::table('casos')->count();
-
         // Contar el total de resoluciones
         $totalResoluciones = DB::table('resoluciones')->count();
-
         // Calcular los casos no resueltos
         $casosNoResueltos = $totalCasos - $totalResoluciones;
-        
         // Retornar el resultado como JSON
         return response()->json([
             'total_casos' => $totalCasos,
@@ -293,6 +297,23 @@ public function casosPorDepartamentoYMunicipio(Request $request)
             'casos_no_resueltos' => $casosNoResueltos,
         ]);
     }
+    public function contarCasosResEmisor(Request $request){
+        
+        $resEmisor_id = $request->query('res_emisor_id');
+        $query = DB::table('res_emisores')
+            ->leftJoin('casos', 'res_emisores.id', '=', 'casos.res_emisor_id')
+            ->select('res_emisores.nombre AS resEmisor', DB::raw('COUNT(casos.id) AS cantidad_casos_Emisor'))
+            ->groupBy('res_emisores.nombre');
+        if ($resEmisor_id) {
+            $query->where('res_emisores.id', $resEmisor_id);
+        }
+        $casosPorResEmisor = $query->get();
+        return response()->json($casosPorResEmisor);
+    }
     
-    
+
+    // Obtiene casos agrupados por año y mes de fecha de ingreso
+
+
+
 }

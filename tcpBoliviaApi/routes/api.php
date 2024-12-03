@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\ResEmisorController;
 use App\Http\Controllers\Api\AccionConstitucionalController;
 use App\Http\Controllers\Api\CasoController;
 use App\Http\Controllers\Api\ResolucionController;
@@ -22,14 +22,27 @@ Route::get('/resoluciones/tipo', [CasoController::class, 'resolucionesPorTipo2']
 
 
 Route::get('/resoluciones/por-fecha', [ResolucionController::class, 'resolucionesPorFecha']);
+Route::get('/casos/por-fecha', [CasoController::class, 'casosPorFechaIngreso']);
 
 Route::get('/resoluciones/por-accion-constitucional', [ResolucionController::class, 'resolucionesPorAccionConstitucional']);
 Route::get('/resoluciones/accion-const', [ResolucionController::class, 'resolucionesPorAccionConst']);
 Route::get('/acciones-constitucionales', [ResolucionController::class, 'accionesConstitucionales']);
 
 Route::get('/unicoGestion', [CasoController::class,'obtenerAniosUnicos']);
+//actualizacion 
+Route::get('/casosPorPeriodo', [CasoController::class,'casosPorPeriodo']);
+Route::get('/casosPorResEmisor', [CasoController::class,'contarCasosResEmisor']);
+Route::get('/resEmisor', [ResEmisorController::class,'showResEmisor']);
+Route::get('/casosPorAnio', [CasoController::class,'casosPorAnio']);
 
-Route::get('/casosPorAnio', [CasoController::class,'casosPorAnios']);
+Route::get('/resolucionesPorAnio', [ResolucionController::class,'resolucionesPorAnio']);
+Route::get('/tiemposResolucion', [ResolucionController::class, 'obtenerTiemposDeResolucion']);
+Route::get('/resolucionPorResFondo', [ResolucionController::class, 'resolucionesPorFondo']);
+Route::get('/resolucionesPorRelator', [ResolucionController::class, 'resolucionesPorRelator']);
+
+
+
+
 Route::get('/accionConstitucional', [AccionConstitucionalController::class,'showAccionConstitucional']);
 Route::get('/lista/Casos', [CasoController::class,'todosLosAtributos']);
 Route::get('/obtenerDatosIniciales', [DatosInicialesController::class, 'obtenerDatosIniciales']);

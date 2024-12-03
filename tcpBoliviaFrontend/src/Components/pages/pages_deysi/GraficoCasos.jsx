@@ -1,16 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import ReactECharts from 'echarts-for-react';
 
 const GraficoCasos = () => {
-  const datosFiltrados = Array.from({ length: 10 }, (_, index) => ({
-    año: 2018 + index,
-    cantidad_casos: Math.floor(Math.random() * 500),
-    cantidad_resoluciones: Math.floor(Math.random() * 300),
-  }));
+  const [datosFiltrados, setDatosFiltrados] = useState([]);
+
+  useEffect(() => {
+    const obtenerDatos = async () => {
+      try {
+        const [casosResponse, resolucionesResponse] = await Promise.all([
+          axios.get('http://localhost:8000/api/casosPorAnio'),
+          axios.get('http://localhost:8000/api/resolucionesPorAnio')
+        ]);
+
+        const casosData = casosResponse.data;
+        const resolucionesData = resolucionesResponse.data;
+
+        const todosAnios = Array.from(new Set([
+          ...casosData.map(caso => caso.anio),
+          ...resolucionesData.map(resolucion => resolucion.anio)
+        ])).sort();
+
+        const datosCombinados = todosAnios.map(anio => {
+          const caso = casosData.find(caso => caso.anio === anio);
+          const resolucion = resolucionesData.find(res => res.anio === anio);
+
+          return {
+            año: anio,
+            cantidad_casos: caso ? caso.cantidad_casos : 0,
+            cantidad_resoluciones: resolucion ? resolucion.cantidad_resoluciones : 0
+          };
+        });
+
+        setDatosFiltrados(datosCombinados);
+      } catch (error) {
+        console.error("Error al obtener los datos:", error);
+      }
+    };
+
+    obtenerDatos();
+  }, []);
 
   const opcionesGrafico = {
     title: {
-      text: 'Casos y Resoluciones por Año',
+      text: 'Causas y Resoluciones por Año',
       left: 'center',
       top: '2%',
       textStyle: {
@@ -71,10 +104,21 @@ const GraficoCasos = () => {
     }
   };
 
+  // Función para recargar los datos al hacer restore
+  const onChartEvent = {
+    restore: () => {
+      setDatosFiltrados((prevData) => [...prevData]);
+    }
+  };
+
   return (
     <div className="container-grafico">
       <div style={{ width: '100%', maxWidth: '1000px', height: '500px' }}>
-        <ReactECharts option={opcionesGrafico} style={{ width: '100%', height: '100%' }} />
+        <ReactECharts
+          option={opcionesGrafico}
+          onEvents={onChartEvent}
+          style={{ width: '100%', height: '100%' }}
+        />
       </div>
     </div>
   );

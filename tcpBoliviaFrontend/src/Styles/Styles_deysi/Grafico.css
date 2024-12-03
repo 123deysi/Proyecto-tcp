@@ -1,10 +1,10 @@
 /* Estilos para el contenedor del gráfico */
 .container-grafico {
-  padding: 20px;
+  padding: 0px;
   background-color: #ffffff; 
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
+  margin-top: 8px;
   height: 500px;
   
 }
@@ -32,7 +32,7 @@
   flex-wrap: wrap; /* Permite que los elementos se ajusten en pantallas pequeñas */
   justify-content: space-between; /* Espacia los elementos */
   align-items: flex-start; /* Alinea los elementos verticalmente al inicio */
-  gap: 20px; /* Espaciado entre el gráfico y el mapa */
+  gap: 5px; /* Espaciado entre el gráfico y el mapa */
 }
 
 .contenedor-grafico-mapa > div {

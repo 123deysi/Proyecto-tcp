@@ -46,22 +46,4 @@ class Caso extends Model
     {
         return $this->belongsTo(Municipio::class, 'municipio_id');
     }
-<<<<<<< HEAD
-
-    // Accesor para formatear la fecha cuando se lee desde el modelo
-    public function getFechaIngresoAttribute($value)
-    {
-        return $value ? Carbon::parse($value)->format('d/m/Y') : null;
-    }
-
-    // Mutador para convertir la fecha a un formato específico antes de guardar
-    public function setFechaIngresoAttribute($value)
-    {
-        $this->attributes['fecha_ingreso'] = $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null;
-    }
-
-
-    
-=======
->>>>>>> ea763639594b34ede0b282b136e6aba82d18378a
 }

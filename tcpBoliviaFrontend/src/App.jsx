@@ -19,8 +19,8 @@ import CronologiasResultados from "./Components/pages/pages_randy/CronologiasRes
 import JurisprudenciaLista from "./Components/pages/pages_randy/JurisprudenciaLista";
 import AnalisisMagistrados from "./Components/pages/pages_randy/AnalisisMagistrados";
 import MagistradoTSJ from "./Components/pages/pages_randy/magistrados/MagistradoTSJ";
-import Principal from "./Components/pages/pages_deysi/principal";
-import BusquedaTCP from "./Components/pages/pages_deysi/BusquedaAvanzada";
+
+
 import AdminLayout from "./Components/pages/pages_administrador/AdminLayout";
 import FormularioCaso from "./Components/pages/pages_administrador/FormularioCaso";
 import FormularioResolucion from "./Components/pages/pages_administrador/FormularioResolucion";
@@ -31,6 +31,7 @@ import { ThemeProvider } from "./Components/ThemeProvider";
 import CerrarLogin from './Components/pages/CerrarLogin';
 import PaginaPrincipal from './Components/pages/pages_deysi/PaginaPrincipal';
 import PaginaFiltro from './Components/pages/pages_deysi/PaginaFiltro';
+import PaginaFiltros2 from './Components/pages/pages_deysi/PaginaFiltros2';
 
 function App() {
   const location = useLocation();
@@ -72,7 +73,7 @@ function App() {
           <Route path="/Jurisprudencia/Cronologias/Resultados" element={<CronologiasResultados />} />
           
 
-          <Route path="/Dinamicas/Busqueda-Avanzada" element={<BusquedaTCP />} />
+        
           <Route path="/Dinamicas/Busqueda/Simple" element={<BusquedaSimple />} />
           <Route path="/Formulario/Datos" element={<FormularioCaso />} />
           <Route path="/Formulario/Casos" element={<FormularioCaso />} />
@@ -81,6 +82,7 @@ function App() {
           
           <Route path="/Dinamicas" element={<PaginaPrincipal />} />
           <Route path="/Dinamicas/Filtro" element={<PaginaFiltro />} />
+          <Route path="/Dinamicas/Filtro2" element={<PaginaFiltros2 />} />
           
           
           <Route path="/Administrador" element={<AdminLayout />}>
