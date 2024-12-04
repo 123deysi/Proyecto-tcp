@@ -103,7 +103,7 @@ g#features {
  .chart-container{
 width: 100%;           /* Ancho del contenedor */
      /* Ancho máximo para evitar que crezca demasiado */
-height: auto;          /* Ajusta la altura automáticamente */
+height: 500px;          /* Ajusta la altura automáticamente */
      /* Espaciado interno para mayor claridad */
 overflow: auto;        /* Agrega scroll si la gráfica es muy grande */
 background-color: #fff; /* Fondo blanco para visibilidad */
@@ -116,9 +116,10 @@ padding-left: 70px;
 
 .chart-container canvas {
   max-width: 100% !important;
-  max-height: 100% !important;
+  max-height: 400px !important;
   width: 100% !important;
-  height: 400px !important;
+  /* height:auto !important; */
+  /* height: 400px !important;  NO PUEDES PONERLE ESE TAMAÑO POR QUE ALTERA EL CONTENEDOR */
  
 }
 

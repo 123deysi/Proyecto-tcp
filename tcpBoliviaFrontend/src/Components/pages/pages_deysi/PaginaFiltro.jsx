@@ -53,6 +53,8 @@ const PaginaFiltro = () => {
   const [chartData9, setChartData9] = useState({labels:[], datasets: []}); // Estado para los datos del gráfico
   const [selectedRelator, setSelectedRelator] = useState(null);
 
+  const [chartOptions3, setChartOptions3] = useState({ labels: [], datasets: [] });
+  const [chartOptions7, setChartOptions7] = useState({ labels: [], datasets: [] });
   const [dataResRelator, setDataResRelator] = useState([]);
   const [departments, setDepartments] = useState([]);
 
@@ -81,6 +83,7 @@ const PaginaFiltro = () => {
   const [restipo2Options, setRestipo2Options] = useState([]);
   const [selectedRestipo2, setSelectedRestipo2] = useState('');
   const [originalChartData3, setOriginalChartData3] = useState([]);
+  // console.log("datos de grafico 3: ", originalChartData3)
 
   const [filteredChartData3, setFilteredChartData3] = useState([]);
   const monthNames = [
@@ -432,9 +435,9 @@ const handleRelatorChange = async (e) => {
     const tipoResolucion = e.target.value;
     console.log('Selected Resolucion Type:', tipoResolucion);
     setSelectedRestipo2(tipoResolucion);
-
+  
     console.log('Original Data for Chart 3 before filtering:', originalChartData3);
-
+  
     if (tipoResolucion === "") {
       // Restaurar todos los datos si se selecciona "todos"
       console.log('No Resolucion Type selected, restoring original data for Chart 3');
@@ -447,7 +450,7 @@ const handleRelatorChange = async (e) => {
         console.log(`Comparing: ${itemTipoResolucion} with ${tipoResolucion}`);
         return itemTipoResolucion === tipoResolucion; // Comparación ajustada
       });
-
+  
       if (filteredData.length === 0) {
         console.log('No data found for the selected Resolucion Type');
         setChartData3({ labels: [], datasets: [] });
@@ -459,6 +462,7 @@ const handleRelatorChange = async (e) => {
       }
     }
   };
+  
   const handleAccionConst2Change = async (e) => {
     const accionConst2Id = e.target.value;
     console.log('Selected Accion Const2 ID:', accionConst2Id); // Agregar esta línea
@@ -499,8 +503,8 @@ const handleRelatorChange = async (e) => {
         {
           label: 'Cantidad de Casos',
           data: counts,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-         // backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`), // Generar colores aleatorios
+          // backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`), // Generar colores aleatorios
           borderRadius: 5,  // Bordes redondeados
           maxBarThickness: 40,  // Ajuste de grosor de barras
         },
@@ -547,10 +551,10 @@ const handleRelatorChange = async (e) => {
       setError('Invalid data format');
       return;
     }
-
+  
     // Guarda los datos originales antes de filtrar
-    setOriginalChartData3(data); // Asegúrate de que aquí tengas los datos originales
-
+    setOriginalChartData3(data);
+  
     // Filtrar datos válidos para la gráfica
     const validData = data.filter(item =>
       item.departamento &&
@@ -559,89 +563,92 @@ const handleRelatorChange = async (e) => {
       item.cantidad_resoluciones !== null &&
       item.cantidad_resoluciones >= 0
     );
-
+  
     if (validData.length === 0) {
       console.log('No valid data for chart 3');
       setChartData3({ labels: [], datasets: [] });
       setError('No valid data for chart 3');
       return;
     }
-
+  
     const labels = validData.map(item => `${item.departamento} - ${item.tipo_resolucion2} - ${item.sub_tipo_resolucion}`);
     const counts = validData.map(item => item.cantidad_resoluciones);
+  
+    // Crear un mapa de colores para los departamentos
+    const departmentColors = {};
+    const uniqueDepartments = [...new Set(validData.map(item => item.departamento))];
+    const colorPalette = [
+      'rgba(153, 102, 255, 0.6)', // color 1
+      'rgba(75, 192, 192, 0.6)',  // color 2
+      'rgba(255, 159, 64, 0.6)',  // color 3
+      'rgba(255, 0, 0, 0.6)',  // color 4
+      'rgba(0, 128, 0, 0.6)',  // color 5
+      'rgba(128, 0, 0, 0.6)',  // color 6
+      'rgba(13, 129, 232, 0.6)',  // color 7
+      'rgba(122, 232, 13, 0.6)', // color 8
+      'rgba(0, 0, 128, 0.6)', // color 9
+      // Agrega más colores si es necesario
+    ];
+  
+    uniqueDepartments.forEach((department, index) => {
+      departmentColors[department] = colorPalette[index % colorPalette.length];
+    });
+  
+    const backgroundColors = validData.map(item => departmentColors[item.departamento]);
+  
     setChartData3({
-      labels,  // Etiquetas del gráfico
+      labels,
       datasets: [
         {
           label: 'Cantidad de Resoluciones',
           data: counts,
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',  // Color de fondo suave y atractivo
-         // borderColor: 'rgba(153, 102, 255, 1)',  // Color del borde de las barras
-          borderWidth: 1,  // Grosor del borde de las barras
-          borderRadius: 5,  // Bordes redondeados para un toque más moderno
-          maxBarThickness: 50,  // Ajustar el grosor máximo de las barras
+          backgroundColor: backgroundColors,
+          borderWidth: 1,
         },
       ],
     });
-
-    const options = {
-      responsive: true,  // Asegura que la gráfica sea responsiva
-      maintainAspectRatio: false,  // Mantener proporciones cuando cambie el tamaño
+  
+    const chartOptions3 = {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         tooltip: {
           callbacks: {
             label: function (tooltipItem) {
-              return tooltipItem.raw + " resoluciones";  // Personalizar el formato del tooltip
+              return tooltipItem.raw + " resoluciones";
             },
           },
         },
         legend: {
-          position: 'top',  // Colocar la leyenda en la parte superior
+          position: 'top',
           labels: {
-            color: 'rgba(0, 0, 0, 0.7)',  // Color del texto de la leyenda
+            color: 'rgba(0, 0, 0, 0.7)',
             font: {
-              size: 14,  // Tamaño de la fuente de la leyenda
-              family: 'Arial, sans-serif',  // Tipo de fuente
+              size: 13,
+              family: 'Arial, sans-serif',
             },
           },
         },
         title: {
           display: true,
-          text: 'Cantidad de Resoluciones',  // Título del gráfico
+          text: 'Cantidad de Resoluciones',
           font: {
-            size: 18,  // Tamaño de la fuente del título
-            family: 'Arial, sans-serif',  // Tipo de fuente
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            color: 'rgba(0, 0, 0, 0.1)',  // Color suave para las líneas del eje X
-          },
-        },
-        y: {
-          grid: {
-            color: 'rgba(0, 0, 0, 0.1)',  // Color suave para las líneas del eje Y
-          },
-          ticks: {
-            font: {
-              size: 12,  // Tamaño de la fuente de las etiquetas del eje Y
-              family: 'Arial, sans-serif',  // Tipo de fuente
-            },
-            callback: function (value) {
-              return value.toLocaleString();  // Agregar separadores de miles en los valores del eje Y
-            },
+            size: 18,
+            family: 'Arial, sans-serif',
           },
         },
       },
       animation: {
-        duration: 1000,  // Duración de la animación (1 segundo)
-        easing: 'easeOutBounce',  // Efecto de rebote cuando aparece la gráfica
+        duration: 1000,
+        easing: 'easeOutBounce',
       },
     };
-
+  
+    // Guardar las opciones en el estado para usarlas en el componente
+    setChartOptions3(chartOptions3);
   };
+  
+  
 
   const formatChartData4 = (data) => {
     if (!data || !Array.isArray(data)) {
@@ -908,62 +915,145 @@ const handleRelatorChange = async (e) => {
 
   // Función para formatear datos agrupados por mes para el gráfico de líneas apiladas
   const formatChartData7 = (data) => {
+    if (!data || !Array.isArray(data)) {
+      console.error('Invalid data format for Chart 7');
+      setError('Invalid data format');
+      return;
+    }
+  
+    // Filtrar datos válidos para la gráfica
+    const validData = data.filter(item =>
+      item.anio &&
+      item.mes &&
+      item.cantidad_casos !== null &&
+      item.cantidad_casos >= 0
+    );
+  
+    if (validData.length === 0) {
+      console.log('No valid data for chart 7');
+      setChartData7({ labels: [], datasets: [] });
+      setError('No valid data for chart 7');
+      return;
+    }
+  
     const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     const casosPorAnioYMes = {};
-
+  
     // Agrupar los casos por año y mes
-    data.forEach(item => {
+    validData.forEach(item => {
       const year = item.anio;
       const month = item.mes - 1; // Ajustar el índice para que coincida con el array de meses
       const key = `${year}-${month}`;
-
+  
       // Inicializar el conteo si la clave no existe en el objeto
       if (!casosPorAnioYMes[key]) {
         casosPorAnioYMes[key] = 0;
       }
-
+  
       // Sumar los casos de ese mes y año
       casosPorAnioYMes[key] += item.cantidad_casos;
     });
-
+  
     // Preparar las etiquetas y los datasets para el gráfico
     const labels = months;
     const datasets = [];
-
+  
     // Obtener los años únicos a partir de los datos
-    const years = [...new Set(data.map(item => item.anio))];
-
+    const years = [...new Set(validData.map(item => item.anio))];
+  
+    // Crear un mapa de colores para los meses
+    const monthColors = generateMonthColors(months.length);
+  
     // Inicializar datasets para cada año
     years.forEach(year => {
       const dataForYear = [];
+      const backgroundColors = [];
       months.forEach((_, monthIndex) => {
         const key = `${year}-${monthIndex}`;
         dataForYear.push(casosPorAnioYMes[key] || 0);
+        backgroundColors.push(monthColors[monthIndex]); // Color específico para el mes
       });
-
-      // Agregar el dataset para este año con un color aleatorio
+  
+      // Agregar el dataset para este año con colores específicos para cada mes
       datasets.push({
         label: year.toString(),
         data: dataForYear,
-        fill: true,
-        backgroundColor: getRandomColor(), // Asignar color aleatorio
-        borderColor: getRandomColor(),     // Borde de línea para cada año
-        tension: 0.3,                       // Curva de suavizado en las líneas (opcional)
-        //maxBarThickness: 50
+        fill: false,
+        backgroundColor: backgroundColors, // Colores específicos para cada mes
+        borderColor: backgroundColors, // Borde del mismo color que el fondo
+        borderWidth: 2,
+        tension: 0.3, // Curva de suavizado en las líneas (opcional)
       });
     });
-
+  
     // Configuración de datos para el gráfico
     setChartData7({
       labels: labels,
       datasets: datasets,
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      // backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`), // Generar colores aleatorios
-       borderRadius: 5,  // Bordes redondeados
-       //maxBarThickness: 50,  // Ajuste de grosor de barras
-     
     });
+  
+    const chartOptions7 = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function (tooltipItem) {
+              return tooltipItem.raw + " casos";
+            },
+          },
+        },
+        legend: {
+          position: 'top',
+          labels: {
+            color: 'rgba(0, 0, 0, 0.7)',
+            font: {
+              size: 13,
+              family: 'Arial, sans-serif',
+            },
+          },
+        },
+        title: {
+          display: true,
+          text: 'Cantidad de Casos por Año y Mes',
+          font: {
+            size: 18,
+            family: 'Arial, sans-serif',
+          },
+        },
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeOutBounce',
+      },
+    };
+  
+    // Guardar las opciones en el estado para usarlas en el componente
+    setChartOptions7(chartOptions7);
   };
+  
+  // Función para generar un array de colores específicos para cada mes
+  const generateMonthColors = (length) => {
+    const colors = [
+      'rgba(153, 102, 255, 0.6)',
+      'rgba(75, 192, 192, 0.6)',
+      'rgba(255, 159, 64, 0.6)',
+      'rgba(255, 99, 132, 0.6)',
+      'rgba(54, 162, 235, 0.6)',
+      'rgba(104, 132, 245, 0.6)',
+      'rgba(203, 52, 205, 0.6)',
+      'rgba(127, 63, 191, 0.6)',
+      'rgba(255, 205, 86, 0.6)',
+      'rgba(75, 192, 192, 0.6)',
+      'rgba(153, 102, 255, 0.6)',
+      'rgba(255, 159, 64, 0.6)',
+    ];
+    return Array.from({ length }, (_, i) => colors[i % colors.length]);
+  };
+  
+  
+  
+  
 
   const formatChartData8 = (data) => {
     if (!data || !Array.isArray(data)) {
@@ -1605,7 +1695,7 @@ const handleRelatorChange = async (e) => {
                     </MuiTooltip>
                     {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData3} />}
                     {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData3} />}
-                    {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData3} />}
+                    {chartType === 'pie' && <Pie  key={chartKey} ref={chartRef} data={chartData3} options={chartOptions3} />}
                     <p className="chart-description">"Cantidad de Resoluciones por Departamento..."</p>
                   </>
                 )}
@@ -1654,7 +1744,6 @@ const handleRelatorChange = async (e) => {
                 )}
 
                 {currentChart === 'chart7' && (
-
                   <>
                     <MuiTooltip title="Guardar como Imagen">
                       <DownloadIcon
@@ -1662,13 +1751,13 @@ const handleRelatorChange = async (e) => {
                         style={{ cursor: 'pointer', fontSize: '24px', color: '#1976d2' }}
                       />
                     </MuiTooltip>
-                    {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData7} />}
-                    {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData7} />}
-                    {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData7} />}
-                    <p className="chart-description">"Cantidad de Casos por Año y mes..."</p>
+                    {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData7} options={chartOptions7} />}
+                    {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData7} options={chartOptions7} />}
+                    {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData7} options={chartOptions7} />}
+                    <p className="chart-description">"Cantidad de Casos por Año y Mes..."</p>
                   </>
-
                 )}
+
                 {currentChart === 'chart8' && (
                   <>
                     <MuiTooltip title="Guardar como Imagen">
