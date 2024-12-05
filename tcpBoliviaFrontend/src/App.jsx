@@ -30,7 +30,7 @@ import BusquedaSimple from "./Components/pages/pages_deysi/BusquedaSimple";
 import { ThemeProvider } from "./Components/ThemeProvider";
 import CerrarLogin from './Components/pages/CerrarLogin';
 import PaginaPrincipal from './Components/pages/pages_deysi/PaginaPrincipal';
-import PaginaFiltro from './Components/pages/pages_deysi/PaginaFiltro';
+import PaginaFiltro from './Components/pages/pages_deysi/PaginaFiltro/PaginaFiltro';
 import PaginaFiltros2 from './Components/pages/pages_deysi/PaginaFiltros2';
 
 function App() {
@@ -71,9 +71,7 @@ function App() {
           <Route path="/Jurisprudencia/Magistrado/:id" element={<MagistradoTSJ />} />
           <Route path="/Jurisprudencia/Resolucion/:id" element={<ResolucionTSJ />} />
           <Route path="/Jurisprudencia/Cronologias/Resultados" element={<CronologiasResultados />} />
-          
 
-        
           <Route path="/Dinamicas/Busqueda/Simple" element={<BusquedaSimple />} />
           <Route path="/Formulario/Datos" element={<FormularioCaso />} />
           <Route path="/Formulario/Casos" element={<FormularioCaso />} />
