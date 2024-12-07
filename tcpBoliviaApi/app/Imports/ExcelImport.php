@@ -25,8 +25,9 @@ class ExcelImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $collection)
     {
-        Log::info('Contenido del archivo importado: ' . json_encode($collection->toArray()));
 
+        Log::info('Contenido del archivo importado: ' . json_encode($collection->toArray()));
+        
         $rows = $collection->toArray();
         foreach ($rows as $index => $row) {
             try {
@@ -177,34 +178,111 @@ class ExcelImport implements ToCollection, WithHeadingRow
 
                 $idResolucion = null;
                 $id2 = trim($row['id2'] ?? ''); // Tomar el 'id2' desde el archivo importado
+                
                 if ($id2 !== '' && $id2 !== 'NULL') {
                     // Buscar el caso por el campo 'id2' en lugar de 'exp'
                     $caso = Caso::where('id2', $id2)->first();
-
+                
                     if ($caso) {
-                        // Buscar o crear la resolución basada en 'numres2'
-                        $resolucion = Resolucion::firstOrNew(['numres2' => $row['numres2']]);
+                        // Buscar si existe una resolución con todos los campos relevantes basados en 'caso_id'
+                        $resolucion = Resolucion::where('caso_id', $caso->id)
+                            ->where('numres2', $row['numres2'])
+                            ->where(function ($query) use ($row) {
+                                // Verificar si 'res_fecha' coincide, permitiendo null
+                                $query->whereNull('res_fecha')
+                                    ->orWhere('res_fecha', !empty($row['res_fecha']) ? Carbon::parse($row['res_fecha'])->format('Y-m-d') : null);
+                            })
+                            ->where(function ($query) use ($idTipoResolucion) {
+                                // Verificar si 'res_tipo_id' coincide, permitiendo null
+                                $query->whereNull('res_tipo_id')
+                                    ->orWhere('res_tipo_id', $idTipoResolucion ?? null);
+                            })
+                            ->where(function ($query) use ($idTipoResolucion2) {
+                                // Verificar si 'res_tipo2_id' coincide, permitiendo null
+                                $query->whereNull('res_tipo2_id')
+                                    ->orWhere('res_tipo2_id', $idTipoResolucion2 ?? null);
+                            })
+                           
 
-                        // Asignar los valores al objeto Resolución
-                        $resolucion->res_fecha = !empty($row['res_fecha']) ? Carbon::parse($row['res_fecha'])->format('Y-m-d') : null;
-                        $resolucion->res_tipo_id = $idTipoResolucion ?? null;
-                        $resolucion->res_tipo2_id = $idTipoResolucion2 ?? null;
-                        $resolucion->res_fondo_voto = is_numeric($row['res_fondo_voto']) ? (int)$row['res_fondo_voto'] : null;
-                        $resolucion->resresul = $row['resresul'] ?? null;
-                        $resolucion->revresul = $row['revresul'] ?? null;
-                        $resolucion->resfinal = $row['resfinal'] ?? null;
-                        $resolucion->relator = $row['relator'] ?? null;
-                        //$resolucion->restiempo = is_numeric($row['restiempo']) ? (float)$row['restiempo'] : null;
-                        $resolucion->restiempo = is_numeric(str_replace(',', '.', $row['restiempo'])) ? (float)str_replace(',', '.', $row['restiempo']) : null;
-                        $resolucion->caso_id = $caso->id; // Asignar la relación con el caso
-                        
-                        // Guardar la resolución
-                        $resolucion->save();
-                        
-                        // Obtener el ID de la resolución
-                        $idResolucion = $resolucion->id;
+                            ->where(function ($query) use ($row) {
+                                // Verificar si 'revresul' coincide, permitiendo null
+                                $query->whereNull('revresul')
+                                    ->orWhere('revresul', $row['revresul'] ?? null);
+                            })  
+                            ->where(function ($query) use ($row) {
+                                // Verificar si 'resfinal' coincide, permitiendo null
+                                $query->whereNull('resfinal')
+                                    ->orWhere('resfinal', $row['resfinal'] ?? null);
+                            }) 
+                            ->where(function ($query) use ($row) {
+                                // Verificar si 'relator' coincide, permitiendo null
+                                $query->whereNull('relator')
+                                    ->orWhere('relator', $row['relator'] ?? null);
+                            })
+                            
+                           
+                            ->first();
+                
+                        if (!$resolucion) {
+                            // Si no existe una resolución, crea una nueva
+                            $resolucion = new Resolucion();
+                            $resolucion->numres2 = $row['numres2'];
+                
+                            // Convertir la fecha utilizando Carbon y verificar que no esté vacía
+                            $resolucion->res_fecha = !empty($row['res_fecha']) 
+                                ? Carbon::parse($row['res_fecha'])->format('Y-m-d') 
+                                : null;
+                
+                            $resolucion->res_tipo_id = $idTipoResolucion ?? null;
+                            $resolucion->res_tipo2_id = $idTipoResolucion2 ?? null;
+                            $resolucion->res_fondo_voto = is_numeric($row['res_fondo_voto']) ? (int)$row['res_fondo_voto'] : null;
+                            $resolucion->resresul = $row['resresul'] ?? null;
+                            $resolucion->revresul = $row['revresul'] ?? null;
+                            $resolucion->resfinal = $row['resfinal'] ?? null;
+                            $resolucion->relator = $row['relator'] ?? null;
+                
+                            // Convertir 'restiempo' a float si es un número
+                            $resolucion->restiempo = is_numeric(str_replace(',', '.', $row['restiempo'])) 
+                                ? (float)str_replace(',', '.', $row['restiempo']) 
+                                : null;
+                
+                            $resolucion->caso_id = $caso->id; // Asignar el caso relacionado
+                
+                            // Guardar la nueva resolución
+                            $resolucion->save();
+                
+                            // Obtener el ID de la resolución
+                            $idResolucion = $resolucion->id;
+                        } else {
+                            // Si ya existe una resolución, actualiza los valores
+                            $resolucion->res_fecha = !empty($row['res_fecha']) 
+                                ? Carbon::parse($row['res_fecha'])->format('Y-m-d') 
+                                : $resolucion->res_fecha;
+                
+                            $resolucion->res_tipo_id = $idTipoResolucion ?? $resolucion->res_tipo_id;
+                            $resolucion->res_tipo2_id = $idTipoResolucion2 ?? $resolucion->res_tipo2_id;
+                            $resolucion->res_fondo_voto = is_numeric($row['res_fondo_voto']) ? (int)$row['res_fondo_voto'] : $resolucion->res_fondo_voto;
+                            $resolucion->resresul = $row['resresul'] ?? $resolucion->resresul;
+                            $resolucion->revresul = $row['revresul'] ?? $resolucion->revresul;
+                            $resolucion->resfinal = $row['resfinal'] ?? $resolucion->resfinal;
+                            $resolucion->relator = $row['relator'] ?? $resolucion->relator;
+                            $resolucion->restiempo = is_numeric(str_replace(',', '.', $row['restiempo'])) 
+                                ? (float)str_replace(',', '.', $row['restiempo']) 
+                                : $resolucion->restiempo;
+                
+                            // Guardar los cambios en la resolución
+                            $resolucion->save();
+                
+                            // Obtener el ID de la resolución
+                            $idResolucion = $resolucion->id;
+                        }
                     }
-            }
+                }
+                
+
+                
+
+
             } catch (\Exception $e) {
                 Log::error('Error al guardar la fila: ' . json_encode($row) . ' - Error: ' . $e->getMessage());
             }

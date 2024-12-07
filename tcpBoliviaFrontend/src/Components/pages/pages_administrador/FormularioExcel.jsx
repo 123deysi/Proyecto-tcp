@@ -32,7 +32,7 @@ const FormularioExcel = () => {
   const handleCSV = (file) => {
     Papa.parse(file, {
       complete: (results) => {
-        console.log('CSV Data:', results.data); // Debugging
+        console.log('CSV Data:', results.data);
         setFileData(results.data);
       },
       header: false,
@@ -49,7 +49,7 @@ const FormularioExcel = () => {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      console.log('Excel Data:', jsonData); // Debugging
+      console.log('Excel Data:', jsonData);
       setFileData(jsonData);
     };
     reader.readAsArrayBuffer(file);
@@ -62,6 +62,9 @@ const FormularioExcel = () => {
       return;
     }
 
+    // Desactivar el botón mientras se sube el archivo
+    setIsFileUploaded(true);
+
     const formData = new FormData();
     formData.append('file', selectedFile);
 
@@ -71,18 +74,19 @@ const FormularioExcel = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setIsFileUploaded(true);
       alert('Archivo subido exitosamente.');
       console.log(response.data);
 
       // Limpiar campos después de la carga exitosa
       setSelectedFile(null);
       setFileData([]);
-      setIsFileUploaded(false);
-      setInputKey(Date.now()); // Actualizar la clave del input
+      setInputKey(Date.now()); // Reinicia el input
     } catch (error) {
       console.error('Error subiendo el archivo:', error);
       alert(`Error al subir el archivo: ${error.response?.data?.error || error.message}`);
+    } finally {
+      // Reactivar el botón después de completar el proceso
+      setIsFileUploaded(false);
     }
   };
 
@@ -94,7 +98,7 @@ const FormularioExcel = () => {
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
           <Input
-            key={inputKey} // Clave única para reiniciar el input
+            key={inputKey}
             type="file"
             onChange={handleFileChange}
             inputProps={{ accept: '.xls, .xlsx, .csv' }}
@@ -106,13 +110,13 @@ const FormularioExcel = () => {
             onClick={handleFileUpload}
             disabled={!selectedFile || isFileUploaded}
             sx={{
-              backgroundColor: '#6c1b30', // Color primario
+              backgroundColor: isFileUploaded ? '#ccc' : '#6c1b30',
               '&:hover': {
-                backgroundColor: '#4a1b24', // Color más oscuro para hover
+                backgroundColor: isFileUploaded ? '#ccc' : '#4a1b24',
               },
             }}
           >
-            Subir Archivo
+            {isFileUploaded ? 'Subiendo...' : 'Subir Archivo'}
           </Button>
         </Box>
       </Box>
@@ -127,12 +131,12 @@ const FormularioExcel = () => {
             <TableHead>
               <TableRow>
                 {fileData[0].map((col, index) => (
-                  <TableCell 
-                    key={`header-${index}`} 
-                    sx={{ 
-                      backgroundColor: '#f5f5f5', 
-                      fontWeight: 'bold', 
-                      border: '1px solid #ddd' 
+                  <TableCell
+                    key={`header-${index}`}
+                    sx={{
+                      backgroundColor: '#f5f5f5',
+                      fontWeight: 'bold',
+                      border: '1px solid #ddd',
                     }}
                   >
                     {col}
@@ -142,13 +146,13 @@ const FormularioExcel = () => {
             </TableHead>
             <TableBody>
               {fileData.slice(1).map((row, rowIndex) => (
-                <TableRow 
-                  key={`row-${rowIndex}`} 
+                <TableRow
+                  key={`row-${rowIndex}`}
                   sx={{ '&:nth-of-type(even)': { backgroundColor: '#f9f9f9' } }}
                 >
                   {row.map((cell, cellIndex) => (
-                    <TableCell 
-                      key={`cell-${rowIndex}-${cellIndex}`} 
+                    <TableCell
+                      key={`cell-${rowIndex}-${cellIndex}`}
                       sx={{ border: '1px solid #ddd' }}
                     >
                       {cell}
