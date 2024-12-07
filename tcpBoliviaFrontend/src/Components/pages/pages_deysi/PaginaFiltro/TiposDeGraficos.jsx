@@ -1,4 +1,4 @@
-const FiltrosDeGraficos = ({ viewType, chartType, setChartType }) => {
+const TiposDeGraficos = ({ viewType, chartType, setChartType }) => {
     return (
         <>
             {viewType === 'chart' ? (
@@ -16,4 +16,4 @@ const FiltrosDeGraficos = ({ viewType, chartType, setChartType }) => {
     )
 }
 
-export default FiltrosDeGraficos
+export default TiposDeGraficos

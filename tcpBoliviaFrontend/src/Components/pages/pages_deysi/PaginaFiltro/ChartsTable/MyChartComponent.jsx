@@ -116,14 +116,15 @@ const MyChartComponent = ({ chartType, labels, counts, title }) => {
     };
 
     return (
-        <div className='w-full max-w-4xl h-[500px] flex justify-self-center shadow-none'>
-            <ReactECharts
-                option={chartOptions}
-                onEvents={onChartEvent}
-                style={{ width: '100%', height: '100%' }}
-            />
+        <div>
+            <div className='w-full max-w-4xl h-[500px] flex justify-self-center shadow-none'>
+                <ReactECharts
+                    option={chartOptions}
+                    onEvents={onChartEvent}
+                    style={{ width: '100%', height: '100%' }}
+                />
+            </div>
         </div>
-
     );
 };
 
