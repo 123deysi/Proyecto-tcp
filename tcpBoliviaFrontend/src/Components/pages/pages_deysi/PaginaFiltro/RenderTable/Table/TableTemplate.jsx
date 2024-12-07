@@ -5,7 +5,6 @@ const TableTemplate = ({ headers, chartData = {}, th1, th2, currentChart }) => {
     console.log(chartData)
     const labels = chartData.labels || [];
     const data = chartData.datasets?.[0]?.data || [];
-
     return (
         <>
             <button

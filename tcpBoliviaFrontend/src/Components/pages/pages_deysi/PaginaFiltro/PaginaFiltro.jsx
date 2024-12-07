@@ -1,44 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import "../../../../Styles/Styles_deysi/Inicio.css";
 import "../../../../Styles/Styles_deysi/mapaBo.css";
 import 'react-toastify/dist/ReactToastify.css';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  PointElement,
-  LineElement,
-  BarElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  LineController,
-  BarController
-} from 'chart.js';
 import TableTemplate from './RenderTable/Table/TableTemplate';
 import Table7 from './RenderTable/Table/Table7';
-import DownloadButton from './ChartsTable/DownloadButton';
-
-ChartJS.register(
-  ArcElement,
-  PointElement,
-  LineElement,
-  BarElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  LineController,
-  BarController
-);
-
+import FiltrosDeGraficos from './FiltrosDeGraficos';
+import MyChartComponent from './ChartsTable/MyChartComponent';
 
 const PaginaFiltro = () => {
-  const chartRef = useRef();
-  const [chartKey, setChartKey] = useState(0); // Estado para controlar la clave única
-
+  const [currentChart, setCurrentChart] = useState('chart1');
+  const [chartType, setChartType] = useState('bar');
   const [chartData1, setChartData1] = useState({ labels: [], datasets: [] });
   const [chartData2, setChartData2] = useState({ labels: [], datasets: [] });
   const [chartData3, setChartData3] = useState({ labels: [], datasets: [] });
@@ -63,26 +35,17 @@ const PaginaFiltro = () => {
   const [selectedResEmisor, setSelectedResEmisor] = useState(''); // Para almacenar el resEmisor seleccionado
 
   const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [totalCases, setTotalCases] = useState(0);
+
   const [error, setError] = useState(null);
   const [accionConst2Options, setAccionConst2Options] = useState([]);
   const [selectedAccionConst2, setSelectedAccionConst2] = useState('');
   const [viewType, setViewType] = useState('chart');
-  const [chartType, setChartType] = useState('bar');
-  const [currentChart, setCurrentChart] = useState('chart1');
   const [selectedYear, setSelectedYear] = useState('');
   const [years, setYears] = useState([]);
   const [originalChartData4, setOriginalChartData4] = useState({ labels: [], datasets: [] });
   const [restipo2Options, setRestipo2Options] = useState([]);
   const [selectedRestipo2, setSelectedRestipo2] = useState('');
   const [originalChartData3, setOriginalChartData3] = useState([]);
-
-  const [filteredChartData3, setFilteredChartData3] = useState([]);
-  const monthNames = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -296,7 +259,6 @@ const PaginaFiltro = () => {
     if (tipoResolucion === "") {
       // Restaurar todos los datos si se selecciona "todos"
       console.log('No Resolucion Type selected, restoring original data for Chart 3');
-      setFilteredChartData3(originalChartData3); // Restore all data
       formatChartData3(originalChartData3); // Formatea la gráfica con datos originales
     } else {
       // Filtrar los datos basados en el tipo de resolución seleccionado
@@ -312,7 +274,6 @@ const PaginaFiltro = () => {
         setError('No valid data for chart 3');
       } else {
         console.log('Filtered Data for Chart 3:', filteredData);
-        setFilteredChartData3(filteredData); // Guardamos los datos filtrados
         formatChartData3(filteredData); // Llamada a la función para formatear los datos filtrados
       }
     }
@@ -348,9 +309,6 @@ const PaginaFiltro = () => {
 
     const labels = data.map(item => item.departamento);
     const counts = data.map(item => item.cantidad_casos);
-    const total = counts.reduce((acc, curr) => acc + curr, 0);
-
-    setTotalCases(total);
 
     setChartData1({
       labels,
@@ -358,10 +316,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Casos',
           data: counts,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          // backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`), // Generar colores aleatorios
-          borderRadius: 5,  // Bordes redondeados
-          maxBarThickness: 40,  // Ajuste de grosor de barras
         },
       ],
 
@@ -393,8 +347,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Casos por Municipio/Departamento',
           data: counts,
-          backgroundColor: 'rgba(255, 99, 132, 0.6)',
-          maxBarThickness: 50,
         },
       ],
     });
@@ -432,11 +384,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Resoluciones',
           data: counts,
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',  // Color de fondo suave y atractivo
-          // borderColor: 'rgba(153, 102, 255, 1)',  // Color del borde de las barras
-          borderWidth: 1,  // Grosor del borde de las barras
-          borderRadius: 5,  // Bordes redondeados para un toque más moderno
-          maxBarThickness: 50,  // Ajustar el grosor máximo de las barras
         },
       ],
     });
@@ -459,8 +406,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Resoluciones por Fecha',
           data: counts,
-          backgroundColor: 'rgba(255, 206, 86, 0.6)', // Color personalizable
-          maxBarThickness: 50,
         },
       ],
     });
@@ -471,11 +416,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Resoluciones por Fecha',
           data: counts,
-          backgroundColor: 'rgba(255, 206, 86, 0.6)', // Color de las barras, puedes ajustarlo como prefieras
-          borderColor: 'rgba(255, 206, 86, 1)', // Borde de las barras para mayor contraste
-          borderWidth: 1,  // Grosor del borde de las barras
-          borderRadius: 5,  // Bordes redondeados
-          maxBarThickness: 50,  // Control de grosor máximo de las barras
         },
       ],
     });
@@ -495,23 +435,9 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Resoluciones por Acción Constitucional',
           data: counts,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          maxBarThickness: 50,
+
         },
       ],
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            ticks: {
-              // Rotar las etiquetas a 45 grados
-              autoSkip: false,
-              maxRotation: 45,
-              minRotation: 45,
-            },
-          },
-        },
-      },
     });
   };
 
@@ -532,27 +458,11 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Casos por Emisor',
           data: counts,  // Datos de la cantidad de casos
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',  // Color de las barras
-          borderColor: 'rgba(153, 102, 255, 1)',  // Borde de las barras para mejor contraste
-          borderWidth: 1,  // Grosor del borde de las barras
-          borderRadius: 5,  // Bordes redondeados para un diseño moderno
-          maxBarThickness: 50,  // Control de grosor máximo de las barras
         },
       ],
     });
   };
 
-
-
-  // Función para generar un color aleatorio (puedes ajustar esta función para generar colores más claros u oscuros)
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
 
   // Función para formatear datos agrupados por mes para el gráfico de líneas apiladas
   const formatChartData7 = (data) => {
@@ -593,11 +503,6 @@ const PaginaFiltro = () => {
       datasets.push({
         label: year.toString(),
         data: dataForYear,
-        fill: true,
-        backgroundColor: getRandomColor(), // Asignar color aleatorio
-        borderColor: getRandomColor(),     // Borde de línea para cada año
-        tension: 0.3,                       // Curva de suavizado en las líneas (opcional)
-        //maxBarThickness: 50
       });
     });
 
@@ -605,11 +510,6 @@ const PaginaFiltro = () => {
     setChartData7({
       labels: labels,
       datasets: datasets,
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      // backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`), // Generar colores aleatorios
-      borderRadius: 5,  // Bordes redondeados
-      //maxBarThickness: 50,  // Ajuste de grosor de barras
-
     });
   };
 
@@ -630,11 +530,6 @@ const PaginaFiltro = () => {
         {
           label: 'Cantidad de Resoluciones por Fondo Voto',
           data: counts,  // Datos de las resoluciones
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',  // Color de las barras con opacidad
-          borderColor: 'rgba(75, 192, 192, 1)',  // Color del borde de las barras
-          borderWidth: 1,  // Grosor del borde
-          borderRadius: 5,  // Bordes redondeados para una apariencia más suave
-          maxBarThickness: 50,  // Máximo grosor de las barras para mantener consistencia
         },
       ],
     });
@@ -645,33 +540,17 @@ const PaginaFiltro = () => {
     // Extraer los labels (relator_id) y los datos de cantidad_resoluciones
     const labels = data.map(item => item.relator_id);
     const resolucionesData = data.map(item => item.cantidad_resoluciones);
-
-    // Crear la estructura de datos para Chart.js
-    const formattedData = {
-      labels: labels,
+    // Actualizar el estado chartData9 con los datos formateados
+    setChartData9({
+      labels,
       datasets: [
         {
           label: 'Cantidad de Resoluciones',
           data: resolucionesData,
-
-          borderColor: 'rgba(75, 192, 192, 1)',
-
-
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',  // Color de las barras con opacidad
-          borderColor: 'rgba(75, 192, 192, 1)',  // Color del borde de las barras
-          borderWidth: 1,  // Grosor del borde
-          borderRadius: 5,  // Bordes redondeados para una apariencia más suave
-          maxBarThickness: 50,  // Máximo grosor de las barras para mantener consistencia
         },
       ],
-    };
-
-    // Actualizar el estado chartData9 con los datos formateados
-    setChartData9(formattedData);
+    });
   };
-
-
-
 
   const renderTable = () => {
     if (currentChart === 'chart1') {
@@ -811,108 +690,12 @@ const PaginaFiltro = () => {
             <i className="fa fa-arrow-left"></i> Atrás
           </a>
         </div>
-        {currentChart !== 'chart4' && currentChart !== 'chart5' && currentChart !== 'chart6' && currentChart !== 'chart7' && currentChart !== 'chart8' && currentChart !== 'chart9' && (
-          <select onChange={handleDepartmentChange} value={selectedDepartment} className="select-departamento">
-            <option value=''>Todos los departamentos</option>
-            {departments.map(department => (
-              <option key={department.id} value={department.id}>{department.nombre}</option>
-            ))}
-          </select>)}
-        {currentChart === 'chart3' && (
-          <select id="restipo2" value={selectedRestipo2} onChange={handleRestipo2Change} className="select-departamento">
-            <option value=''>Seleccione un tipo de resolución</option>
-            {restipo2Options.map((tipo, index) => (
-              <option key={tipo.id || index} value={tipo.tipo_resolucion2}>
-                {tipo.tipo_resolucion2}
-              </option>
-            ))}
-          </select>)}
-        {currentChart === 'chart4' && (
-          <>
-            <select onChange={handleYearChange} value={selectedYear} className="select-year select-departamento">
-              <option value=''>Selecciona un año</option>
-              {years.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </>)}
-        {currentChart === 'chart5' && (
-          <select onChange={handleAccionConst2Change} value={selectedAccionConst2} className="select-accion-const2 select-departamento">
-            <option value=''>Selecciona Acción Constitucional 2</option>
-            {accionConst2Options.map(option => (
-              <option key={option.id} value={option.id}>{option.nombre}</option>
-            ))}
-          </select>)}
-        {currentChart === 'chart6' && (
-          <select onChange={handleResEmisorChange} value={selectedResEmisor} className="select-resEmisor select-departamento">
-            <option value=''>Selecciona Emisor</option>
-            {resEmisorOptions.map(option => (
-              <option key={option.id} value={option.id}>{option.nombre}</option>
-            ))}
-          </select>
-        )}
-        {currentChart === 'chart7' && (
-          <select onChange={handleFechaIngresoChange} value={selectedFechaIngreso} className="select-year select-departamento">
-            <option value=''>Selecciona un año (fecha ingreso)</option>
-            {yearsIngreso.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-        )}
-
-        {currentChart === 'chart8' && (
-          <select
-            onChange={handleResFondoVotoChange}
-            value={selectedResFondoVoto}
-            className="select-year select-departamento"
-          >
-            <option value=''>Selecciona un Res Fondo Voto</option>
-            {dataResFondoVoto.map(item => (
-              <option key={item.res_fondo_voto} value={item.res_fondo_voto}>
-                {item.res_fondo_voto}
-              </option>
-            ))}
-          </select>
-
-        )}
-        {currentChart === 'chart9' && (
-          <select
-            onChange={handleRelatorChange}
-            value={selectedRelator}
-            className="select-relator select-departamento"
-          >
-            <option value=''>Selecciona un Relator</option>
-            {dataResRelator.map(item => (
-              <option key={item.id} value={item.id}>
-                {item.nombre}
-              </option>
-            ))}
-          </select>
-        )}
-        <div className="view-toggle">
-          <button id='GraficoDatos' onClick={() => setViewType('chart')} className={viewType === 'chart' ? 'active' : ''}>Gráfica</button>
-          <button id='TablaDatos' onClick={() => setViewType('table')} className={viewType === 'table' ? 'active' : ''}>Tabla</button>
-        </div>
         <div className='flex flex-row flex-wrap justify-center py-3 gap-3'>
-          {viewType === 'chart' ? (
-            <select
-              onChange={(e) => setChartType(e.target.value)}
-              value={chartType}
-              className="bg-slate-100 p-3"
-            >
-              <option value="bar">Gráfico de Barras</option>
-              <option value="line">Gráfico de Líneas</option>
-              <option value="pie">Gráfico Circular</option>
-            </select>
-          ) : null}
           <select onChange={(e) => setCurrentChart(e.target.value)} value={currentChart} className="bg-slate-100 p-3">
-
             <option value='chart1'>Gráfico por Departamento</option>
             <option value='chart2'>Gráfico por Municipio</option>
             <option value='chart7'>Gráfico Casos por Fecha  (Año-Mes)</option>
             <option value='chart6'>Gráfico por ResEmisor</option>
-
-
           </select>
           <select onChange={(e) => setCurrentChart(e.target.value)} value={currentChart} className="bg-slate-100 p-3">
             <option value='chart1'>selecione grafico por resoluciones</option>
@@ -923,108 +706,251 @@ const PaginaFiltro = () => {
             <option value='chart9'>Gráfico por Relator</option>
           </select>
         </div>
-        <div className="chart-container">
-          {viewType === 'chart' ? (
-            <div>
-              {currentChart === 'chart1' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData1} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData1} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData1} />}
-                  <p className="chart-description">"Este gráfico presenta la cantidad total de causas reportados por departamento..."</p>
-                </>
-              )}
-              {currentChart === 'chart2' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData2} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData2} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData2} />}
-                  <p className="chart-description">"Gráfico de casos por municipio."</p>
-                </>
-              )}
-              {currentChart === 'chart3' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData3} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData3} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData3} />}
-                  <p className="chart-description">"Cantidad de Resoluciones por Departamento..."</p>
-                </>
-              )}
-              {currentChart === 'chart4' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData4} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData4} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData4} />}
-                  <p className="chart-description">"Cantidad de Resoluciones por Año y Mes..."</p>
-                </>
-              )}
-              {currentChart === 'chart5' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData5} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData5} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData5} />}
-                  <p className="chart-description">"Cantidad de Resoluciones por Acción Constitucional..."</p>
-                </>
-              )}
-              {currentChart === 'chart6' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData6} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData6} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData6} />}
-                  <p className="chart-description">"Cantidad de Casos por ResEmisor..."</p>
-                </>
-              )}
+        <div className='flex flex-row flex-wrap justify-center py-3 gap-3'>
+          <div className="view-toggle">
+            <button id='GraficoDatos' onClick={() => setViewType('chart')} className={viewType === 'chart' ? 'active' : ''}>Gráfica</button>
+            <button id='TablaDatos' onClick={() => setViewType('table')} className={viewType === 'table' ? 'active' : ''}>Tabla</button>
+          </div>
+          <FiltrosDeGraficos
+            viewType={viewType}
+            currentChart={currentChart}
+            chartType={chartType}
+            setChartType={setChartType}
+            setCurrentChart={setCurrentChart}
+          />
+          {currentChart !== 'chart4' && currentChart !== 'chart5' && currentChart !== 'chart6' && currentChart !== 'chart7' && currentChart !== 'chart8' && currentChart !== 'chart9' && (
+            <select
+              onChange={handleDepartmentChange}
+              value={selectedDepartment}
+              className="bg-slate-100 p-3">
+              <option value=''>Todos los departamentos</option>
+              {departments.map(department => (
+                <option key={department.id} value={department.id}>{department.nombre}</option>
+              ))}
+            </select>)}
+          {currentChart === 'chart3' && (
+            <select id="restipo2"
+              value={selectedRestipo2}
+              onChange={handleRestipo2Change}
+              className="bg-slate-100 p-3">
+              <option value=''>Seleccione un tipo de resolución</option>
+              {restipo2Options.map((tipo, index) => (
+                <option key={tipo.id || index} value={tipo.tipo_resolucion2}>
+                  {tipo.tipo_resolucion2}
+                </option>
+              ))}
+            </select>)}
+          {currentChart === 'chart4' && (
+            <>
+              <select
+                onChange={handleYearChange}
+                value={selectedYear}
+                className="bg-slate-100 p-3">
+                <option value=''>Selecciona un año</option>
+                {years.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </>)}
+          {currentChart === 'chart5' && (
+            <select
+              onChange={handleAccionConst2Change}
+              value={selectedAccionConst2}
+              className="bg-slate-100 p-3">
+              <option value=''>Selecciona Acción Constitucional 2</option>
+              {accionConst2Options.map(option => (
+                <option key={option.id} value={option.id}>{option.nombre}</option>
+              ))}
+            </select>)}
+          <select
+            onChange={handleAccionConst2Change}
+            value={selectedAccionConst2}
+            className="bg-slate-100 p-3">
+            <option value=''>Años</option>
+            <option value={2016}>2016</option>
+            <option value={2017}>2017</option>
+            <option value={2018}>2018</option>
+            <option value={2019}>2019</option>
+            <option value={2020}>2020</option>
+          </select>
+          {currentChart === 'chart6' && (
+            <select
+              onChange={handleResEmisorChange}
+              value={selectedResEmisor}
+              className="bg-slate-100 p-3">
+              <option value=''>Selecciona Emisor</option>
+              {resEmisorOptions.map(option => (
+                <option key={option.id} value={option.id}>{option.nombre}</option>
+              ))}
+            </select>
+          )}
+          {currentChart === 'chart7' && (
+            <select
+              onChange={handleFechaIngresoChange}
+              value={selectedFechaIngreso}
+              className="bg-slate-100 p-3">
+              <option value=''>Selecciona un año (fecha ingreso)</option>
+              {yearsIngreso.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          )}
 
-              {currentChart === 'chart7' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData7} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData7} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData7} />}
-                  <p className="chart-description">"Cantidad de Casos por Año y mes..."</p>
-                </>
+          {currentChart === 'chart8' && (
+            <select
+              onChange={handleResFondoVotoChange}
+              value={selectedResFondoVoto}
+              className="bg-slate-100 p-3"
+            >
+              <option value=''>Selecciona un Res Fondo Voto</option>
+              {dataResFondoVoto.map(item => (
+                <option key={item.res_fondo_voto} value={item.res_fondo_voto}>
+                  {item.res_fondo_voto}
+                </option>
+              ))}
+            </select>
 
-              )}
-              {currentChart === 'chart8' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData8} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData8} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData8} />}
-                  <div className="chart-description">
-                    <p>Cantidad de Resoluciones por Fondo Voto:</p>
-                    <ul>
-                      <li>1 = Resolución unánime</li>
-                      <li>2 = Resolución con disidencia o voto aclaratorio</li>
-                    </ul>
-                  </div>
-                </>
-              )}
-
-              {currentChart === 'chart9' && (
-                <>
-                  <DownloadButton chartRef={chartRef} />
-                  {chartType === 'bar' && <Bar key={chartKey} ref={chartRef} data={chartData9} />}
-                  {chartType === 'line' && <Line key={chartKey} ref={chartRef} data={chartData9} />}
-                  {chartType === 'pie' && <Pie key={chartKey} ref={chartRef} data={chartData9} />}
-                  <div className="chart-description">
-                    <p>Cantidad de Resoluciones por Relator:</p>
-
-                  </div>
-                </>
-              )}
-
-            </div>
-          ) : (
-            renderTable()
+          )}
+          {currentChart === 'chart9' && (
+            <select
+              onChange={handleRelatorChange}
+              value={selectedRelator}
+              className="bg-slate-100 p-3"
+            >
+              <option value=''>Selecciona un Relator</option>
+              {dataResRelator.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.nombre}
+                </option>
+              ))}
+            </select>
           )}
         </div>
+        {viewType === 'chart' ? (
+          <div className='p-6 pb-16 outline-1 outline rounded-md outline-gray-400'>
+            {currentChart === 'chart1' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData1?.labels || []}
+                  counts={chartData1?.datasets[0]?.data || []}
+                  title={chartData1?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center text-break">
+                  Total de las causas reportadas por cada departamento...
+                </p>
+                {console.log(chartData1?.labels)}
+              </div>
+            )}
+            {currentChart === 'chart2' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData2?.labels || []}
+                  counts={chartData2?.datasets[0]?.data || []}
+                  title={chartData2?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">"Gráfico de casos por municipio.</p>
+                {console.log(chartData2?.labels)}
+              </div>
+            )}
+            {currentChart === 'chart3' && (
+              <div >
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData3?.labels || []}
+                  counts={chartData3?.datasets[0]?.data || []}
+                  title={chartData3?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">Cantidad de Resoluciones por Departamento...</p>
+              </div>
+            )}
+            {currentChart === 'chart4' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData4?.labels || []}
+                  counts={chartData4?.datasets[0]?.data || []}
+                  title={chartData4?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">Cantidad de Resoluciones por Año y Mes...</p>
+              </div>
+            )}
+            {currentChart === 'chart5' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData5?.labels || []}
+                  counts={chartData5?.datasets[0]?.data || []}
+                  title={chartData5?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">Cantidad de Resoluciones por Acción Constitucional...</p>
+              </div>
+            )}
+            {currentChart === 'chart6' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData6?.labels || []}
+                  counts={chartData6?.datasets[0]?.data || []}
+                  title={chartData6?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">Cantidad de Casos por ResEmisor...</p>
+              </div>
+            )}
+
+            {currentChart === 'chart7' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData7?.labels || []}
+                  counts={chartData7?.datasets[0]?.data || []}
+                  title={chartData7?.datasets[0]?.label || "Cargando..."}
+                />
+                <p className="text-center py-10">Cantidad de Casos por Año y mes...</p>
+              </div>
+
+            )}
+            {currentChart === 'chart8' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData8?.labels || []}
+                  counts={chartData8?.datasets[0]?.data || []}
+                  title={chartData8?.datasets[0]?.label || "Cargando..."}
+                />
+                <div className="text-center py-10">
+                  <p>Cantidad de Resoluciones por Fondo Voto:</p>
+                  <ul>
+                    <li>1 = Resolución unánime</li>
+                    <li>2 = Resolución con disidencia o voto aclaratorio</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {currentChart === 'chart9' && (
+              <div>
+                <MyChartComponent
+                  chartType={chartType}
+                  labels={chartData9?.labels || []}
+                  counts={chartData9?.datasets[0]?.data || []}
+                  title={chartData9?.datasets[0]?.label || "Cargando..."}
+                />
+                {console.log(chartType,
+                  chartData9?.labels,
+                  chartData9?.datasets[0]?.data,
+                  chartData9?.datasets[0]?.label)
+                }
+                <div className="text-center py-10">
+                  <p>Cantidad de Resoluciones por Relator:</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          renderTable()
+        )}
       </div>
     </div>
   );
